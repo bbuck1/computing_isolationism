@@ -1,0 +1,584 @@
+---
+title: "Computing 'Isolationism'"
+description: |
+  Using Computational Methods to Analyze the Decline of Isolationism in America, 1945-1957
+author:
+  - name: Brandan P. Buck
+    affiliation: George Mason University
+date: "`r Sys.Date()`"
+output: distill::distill_article
+---
+
+```{r setup, echo= FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+library(dplyr) 
+library(scales)
+library(readr)
+library(distill)
+library(ggplot2)
+library(ggExtra)
+library(jpeg)
+library(knitr)
+library(pals)
+library(grid)
+library(tidyverse)
+library(plotly)
+
+
+Hall_all_members<- read.csv("C:/Users/bpbuc/Documents/Brandan's Stuff/_PhD Stuff/Dissertation Research/vote__view_data/HSall_members.csv")
+
+Hall_votes<- read.csv("C:/Users/bpbuc/Documents/Brandan's Stuff/_PhD Stuff/Dissertation Research/vote__view_data/Hall_votes.csv")
+
+isolationists_final<- read.csv("C:/Users/bpbuc/Documents/Brandan's Stuff/_PhD Stuff/Dissertation Research/map/isolationists_final.csv")
+
+key_votes_all<- read.csv("C:/Users/bpbuc/Documents/Brandan's Stuff/_PhD Stuff/Dissertation Research/map/Hall_all_members_79_84_vote_join.csv")
+
+key_votes_all_list<-read.csv("C:/Users/bpbuc/Documents/Brandan's Stuff/_PhD Stuff/Dissertation Research/key_votes_79_84_list.csv")
+
+```
+
+Eugene Siler holds the distinction of being the only member of U.S. House of Representatives to vote in opposition to the Gulf of Tokin Resolution ^[By paring no, H.J. RES. 1145, 1964-08-07, https://voteview.com/rollcall/RH0880197]. Siler belies our conventional archetype of a vocal antiwar figure. He was a social and economically conservative Christian, a lay preacher from a southern state (Kentucky to be exact) and a Republican to boot. His opposition to Vietnam was not an isolated episode. During his congressional career (1955-1965) he consistently voted against foreign policy measures which vested power within the executive branch and was skeptical of U.S. foreign policy goals more generally. Siler also opposed legislation which delegated to the presidency the ability to defend the island of Taiwan without explicit congressionally authorization. He was one of only three representatives to vote no ^[H J RES 159, 1955-01-25, https://voteview.com/rollcall/RH0840002]. Siler was illustrative of a then all but extinct breed of politician, the rightwing anti-interventionist. His time in congress began as the Old Right, a hodgepodge of fervent anti-New Dealers, trade protections, and noninterventionists, faded out of the Republican Party. Beginning in the mid-1950s, the GOP shed its old isolationist cohort and became an explicitly interventionist and internationalist political party. Despite small flareups initiated by the Republican primary campaigns of Patrick Buchannan (1992 & 1996) and Ron Paul (2008, 2012), strains of conservative noninterventionism remained muted until the 2010s. The history of conservative foreign policy has been well researched and chronicled by political scientists and historians. However, what remains to be fully known is: how did rightwing opposition to U.S. foreign policy and the national security state survive its political irrelevance, and what were the forces which reanimated it after the end of the Cold War? To answer this question, it could be valuable to revisit the erosion of “isolationism” in the United States between 1945 and 1957 using digital techniques. 
+
+<h3 align="center"> A (Somewhat) Brief Historiography: </h3>
+
+The words “isolationist” and “isolationism” are sloppy, imprecise, and often dishonest characterizations of those who opposed U.S. entry into the Second War World and/or opposed consensus foreign policy during the nascent Cold War. Robert Taft, Republican senator of Ohio, then known as “Mr. Republican,” wryly observed that an isolationist was “anyone who opposed the policy of the moment.”^[Doenecke, Justus D. <i> Not to the Swift: The Old Isolationists in the Cold War Era </i> (Cranbury, Associated University Presses, Inc, 1979), p.12] Additionally, many isolationists were not that isolationist. Some of the elected officials and their boosters in the press who were assailed with that label supported robust and violent U.S. action in the Western hemisphere, and in some cases, East Asia. Furthermore, some argue that the label was conceived of and used as a political slur, one meant to mispresent the foreign policy views of those who opposed the administrations of Roosevelt, Truman, Eisenhower ^[Doenecke, p. 20]. Despite its shortcomings the term has stuck because it has become a shorthand for a particular political cohort of conservatives who opposed U.S. interventionism in Europe and outside the Western hemisphere, particularly in former European colonies. Therefore, despite its shortcomings I will use it to refer to these politicians and their supporters outside of government.
+Justus Doenecke’s <i>Not to the Swift: The Old Isolationists in the Cold War Era</i> is a cornerstone of scholarship on postwar isolationism in the United States. Published in 1979, <i> Not to the Swift </i> is a comprehensive account of isolationism’s end in the mid-1950s. Doenecke offers a multicausal explanation for isolationism’s decline, and does not appear to favor any one over another. Among his reasons offered is sheer attrition due to the relative age of isolationists in elected office ^[Doenecke p. 242], a splitting of the cohort via McCarthyism ^[Doenecke p.212] and China policy ^[Doenecke p. 189-196] and Eisenhower’s ability to neutralize isolationist opposition through his Korea armistice and New Look defense policy ^[Doenecke p 231, 232].In <i> A Cross of Iron: Harry S. Truman and the Origins of the National Security State </i>, author Michael J. Hogan offers his take on the decline of isolationism. Hogan argues that the Korean War constituted the beginning of the end of isolationist resistance as the conflict drove a wedge in their opposition and made possible a suite of legislative compromises ^[Hogan, Michael <i> A Cross of Iron: Harry S. Truman and the Origins of the National Security State, 1945-1954</i> Cambridge University Press, 1998 p. 319] and that Eisenhower’s New Look placated the right wing of the GOP but still accelerated U.S. defense spending and obligations aboard.
+
+In addition to these scholars, political and ideological insiders have written numerous accounts of the end of isolationism. These accounts are should be approached with caution as these they possess a clear rooting interest in the events that they are describing. Works which fit into this category are Pat Buchanan’s <i>A Republic not an Empire</i>, Bill Kauffman’s <i>Ain’t My America</i>, Justin Raimando’s <i>Reclaiming the American Right</i>, and Murray Rothbard’s <i>Betrayal of the American Right</i>. If the titles of these works are an indication, they were written by authors who have an axe to grind. They are not pleased with the current state of American conservativism and their narratives are an attempt to right the ship of the American right by reviving rightwing noninterventionism. Despite these issues these works provide valuable insights into an understudied facet of American political history. These works often, to one degree or another play up the role of Republican party infighting as the reason for isolationism’s decline. It is fair to say that throughout the 1950’s, the GOP was embroiled by an ideological split between what Murray Rothbard called “the Old Right,” and an interventionist and domestically moderate political cohort. This split often encapsulated by the Robert Taft v. Thomas Dewey primary fight of 1948, which saw latter victorious…only to be soundly defeat by the incumbent, President Harry Truman. For these authors, Dewey lost the election of 1948, but his ideology was ultimately victorious within the GOP, and narrowed the range of acceptable political thought on the right, particularly visa vie foreign policy and the national security state. Examples cited are the departure of Frank Chodorov from <i>Human Events </i> and later from the <i>Freeman</i> ^[Raimond, 147, Rothbard, 137], the influence of William F. Buckley and his <i>National Review</i> ^[Raimondo, p.14, Kaufman, 132, Rothbard, 123], and elite designs of GOP party leadership from Eisenhower onward.
+
+To be fair to Murray Rothbard, his account is as extensive as Doenecke’s. In addition to the aforementioned, he argues that Joseph McCarthy, in concert with William Buckley brought a new voting bloc into the Republican party, urban Catholics. These new conservatives, according to Rothbard possessed a positive view of the state, and advocated for a strong bureaucracy to stamp out communism at home as well as abroad ^[Rothbard, 152]. He also claimed that the vestiges of the Old Right (himself included) were redbaited by interventionist Republicans and Democrats ^[Rothbard, 131, 162]. He adds to this observation by going as far as to claim that “[i]t was, in fact, McCarthy and “McCarthyism” that provided the main catalyst for transforming the mass base of the right wing from isolationism and quasi-libertarianism to simple anti-Communism” ^[Rothbard 151].       
+
+The combined knowledge of these historians, pundits and other authors provide many, usually overlapping causes for the decline of isolationism in the 1950s. While these causes may not be mutually exclusive a more definitive explanation would provide a juxtaposition on noninterventionism’s eventual return. If our partisan authors are to be believed, then the Cold War may not have taken the overtly belligerent course that it did, if a reliable voice of restraint held on within the Republican party. Similarly, if isolationism’s decline was caused by its exclusion from the conservative publishing world in the mid-1950s it shows the power of elite institutions to curate political thought…and highlights the disruptive power of the early internet in the mid-1990s, which aided in its resurrection. However, if the elimination of rightwing isolationism was the result of popular political will, particularly a transformation in the Midwestern electorate, then such elite machinations would have been irrelevant. To untangle some of these proposed causes, I will attempt to use digital methods applied to congressional voting records as a means of gauging isolationism’s decline and as a means of focusing traditional primary source research. Also, I intend to use these methods to see how many old isolationists survived the political realignment, in office and with their ideologies intact. 
+
+
+<h3 align="center"> The Data: </h3>
+The primary dataset used for this analysis comes from the VoteView.com website which is maintained by the University of California, Los Angeles’ political science department. The data comes in two sets, one for roll call votes and the other on individual representatives. The first is a dataset for every congressional session, congressional representative and their vote for every roll number vote in a given session. The latter dataset is on the congressional representatives themselves. This corpus contains information on every session, district, state, party, birth, death dates and other information. VoteView also makes available data on every congressional member’s political ideology. Said data comes in the form two data scores which estimate the ideology position of any rep on the traditional liberal v. conservative (economic redistribution) axis, and a second spectrum determined from other social policy positions. ^[https://voteview.com/articles/data_help_members]. These scores combine to place individuals on a four-quadrant ideological map. For my purposes this data will help to test the assertions some of our previous historical work, particularly that of our more ideologically motivated authors. Lastly, as discussed at length below, vote counts will be added together to create a new column used to determine isolationists and their interventionist counterparts. Additionally, population data from Sanford’s Center for Spatial and Textual Analysis was used for a supplementary geospatial portion of this paper.
+
+```{r, layout="l-body-outset", echo= FALSE}
+
+library(rmarkdown)
+
+Hall_all_members_79_84<- Hall_all_members %>% 
+  filter(chamber == "House") %>% 
+  filter(congress > 78,
+         congress < 85) 
+
+Hall_votes_79_84<- Hall_votes %>% 
+  filter(chamber == "House") %>% 
+  filter(congress > 78,
+         congress < 85)
+
+
+paged_table(Hall_all_members_79_84)
+
+paged_table(Hall_votes_79_84)
+
+```
+<h3 align="center"> The Method: </h3>
+
+I chose to confine this study from the 79th congress (January 1945 to January 1947) to the 84th congress (January 1955 to January 1957) because the historical consensus is that this period represents the last gasp of isolationism within the Republican party. As a result a rough consensus was formed between the Democratic and Republican parties built around a robust anticommunist effort overseas. As we will see, as far as congress is concerned, this periodization is apt. I made the additional choice to confine efforts to the U.S. House of Representatives. This choice was motivated by the following reasons. The historiography has established that isolationist tendencies were greatest in the House. The size and regional nature of House representation provides a better window into intraparty struggles, regionalism, and the urban v. rural dynamics therein. 
+
+Methodological, my efforts thus far have revolved around determining congressional trends and inflection points using voting records as a proxy for the changing political and ideological trends within the party. To establish them I selected votes from the VoteView.com database which I thought were important to the larger debates which surrounded U.S. foreign policy and the national security state. To determine these votes, I first turned to conventional secondary sources such as <i>A Cross of Iron</i> and <i>Not to the Swift</i>. Key votes early in this period are easy to identify as they built the scaffolding of the Cold War and their impact has been well documented. Examples of such are legislation which brought about the Truman Doctrine (HR2616), debated the Bretton Woods Agreement (HRE685) or initiated the Mutual Defense Assistance Act (HR5895). 
+
+These secondary sources were supplemented by the official “Congress Profiles” page hosted by the House of Representatives which offers key legislation passed in any given congressional session. Lastly, to supplement these resources I searched the VoteView.com website for key votes. My first sweep through their database was use the site’s “Key Vote” filter to sift through “Defense Policy Budget,” Defense Policy Resolutions,” “Foreign and Defense Policy,” “Foreign Policy Budget,” or “Foreign Policy Resolutions.” Once I was confident that I had found all the landmark votes I searched everything within the database, not just those defined as “key votes” by <i>Congressional Quarterly</i> but which adhered to one of the categories mentioned above. This was especially valuable later in the period of study as foreign policy and national security votes went from those of program initiation to those of sustainment through appropriation. 
+
+I filtered these results by searching those votes which passed, the reasoning being that since I am seeking to measure the decline of isolationism, I would be best served measuring their defeats. So, I omitted failed votes which were aimed to cut program funding, curtail programs etc. The inclusion of such bills would have made my code even more complicated than it is in its current form. I scanned the results for versions of bills in their final iteration and used other sources such as govtrack.us to fill in VoteView’s metadata holes. The result was a body of 44 votes, six for the 79th congress, eight each for the 80th, 81st, 82nd, six for the 83rd and eight for the 84th (results are listed below).
+
+```{r, layout="l-body-outset", echo= FALSE}
+
+paged_table(key_votes_all_list)
+
+```
+
+How does one determine who is an isolationist or interventionist? To identify my isolationists I elected to implement, what I believe to be a fairly high bar. I chose to use only nay votes, and did not include abstentions, or absences, the reasoning being I intended only to count votes which signaled a clear expression of political preference. Also, I defined an isolationist as any representative which voted nay to more than 50% of the votes identified above within any given congress. I chose this threshold after some early experimentation and the influence of current historiography. Eugene Siler and H.R. Gross (another noted isolationist) each cleared this bar. The voting patterns of these two constituted my floor, because I figure anyone more stringent than these two lauded by the contemporary noninterventionist conservatives and libertarians must be deserving of the label “isolationist.” To identify my interventionist cohort, I simply reversed the code and looked for any representative who voted yay to more than half of the aforementioned votes in any given session. Since I set by bar at more than half no rep could be in both cohorts during the same congressional session. What about those reps which not meet either standard? To identify them, I appended my returns to the Hall_members data to find those who did not fall into either category, let’s call them the fence sitters…or more politely, the noncommitted. The result was a dataset which added yay or nay vote totals to every congressional representative who met our threshold for either category and a new data column which categorized every rep as either an Isolationist, Interventionist, or Noncommitted for every congressional session from the 79th to the 84th.	  
+
+```{r, layout="l-body-outset", echo=FALSE}
+
+#First lets discover every member of congress which meets our threshold to be considered an "isolationist," that threshold being a greater than 50% "no" vote on sum of key foriegn policy and national security votes.
+
+Hall_members_79<- Hall_all_members %>%
+  filter(congress == "79")
+
+Hall_votes_79<- Hall_votes %>% 
+  filter(congress == "79")
+
+Hall_votes_79_joined<- Hall_members_79 %>%
+  left_join(Hall_votes_79, by = 'icpsr') %>% 
+  filter(rollnumber == '5'|
+           rollnumber == '17'|
+           rollnumber == '31'|
+           rollnumber == '47'|
+           rollnumber == '100'|
+           rollnumber == '194') %>% 
+  filter(cast_code == '6') %>% 
+  group_by(icpsr, bioname, state_abbrev, district_code, party_code, congress.x, nominate_dim1, nominate_dim2)%>% 
+  summarize(nay_no = n()) %>% 
+  filter(nay_no > 3)
+
+Hall_members_80<- Hall_all_members %>% 
+  filter(congress == "80")
+
+Hall_votes_80<- Hall_votes %>% 
+  filter(congress == "80")
+
+Hall_votes_80_joined<- Hall_members_80 %>%
+  left_join(Hall_votes_80, by = 'icpsr') %>%
+  filter(rollnumber == '37'|
+           rollnumber == '51'|
+           rollnumber == '82'|
+           rollnumber == '105'|
+           rollnumber == '147'|
+           rollnumber == '154'|
+           rollnumber == '158'|
+           rollnumber == '159') %>% 
+  filter(cast_code == '6') %>% 
+  group_by(icpsr, bioname, state_abbrev, district_code, party_code, congress.x, nominate_dim1, nominate_dim2)%>% 
+  summarize(nay_no = n()) %>% 
+  filter(nay_no > 4)
+
+Hall_members_81<- Hall_all_members %>% 
+  filter(congress == "81")
+
+Hall_votes_81<- Hall_votes %>% 
+  filter(congress == "81")
+
+Hall_votes_81_joined<- Hall_members_81 %>%
+  left_join(Hall_votes_81, by = 'icpsr') %>%
+  filter(rollnumber == '7'|
+           rollnumber == '43'|
+           rollnumber == '98'|
+           rollnumber == '123'|
+           rollnumber == '131'|
+           rollnumber == '196'|
+           rollnumber == '190'|
+           rollnumber == '269') %>% 
+  filter(cast_code == '6') %>% 
+  group_by(icpsr, bioname, state_abbrev, district_code, party_code, congress.x, nominate_dim1, nominate_dim2)%>% 
+  summarize(nay_no = n()) %>% 
+  filter(nay_no > 4)
+
+
+Hall_members_82<- Hall_all_members %>% 
+  filter(congress == "82")
+
+Hall_votes_82<- Hall_votes %>% 
+  filter(congress == "82")
+
+Hall_votes_82_joined<- Hall_members_82 %>%
+  left_join(Hall_votes_82, by = 'icpsr') %>%
+  filter(rollnumber == '35'|
+           rollnumber == '37'|
+           rollnumber == '85'|
+           rollnumber == '88'|
+           rollnumber == '100'|
+           rollnumber == '138'|
+           rollnumber == '153'|
+           rollnumber == '155') %>% 
+  filter(cast_code == '6') %>% 
+  group_by(icpsr, bioname, state_abbrev, district_code, party_code, congress.x, nominate_dim1, nominate_dim2)%>% 
+  summarize(nay_no = n()) %>% 
+  filter(nay_no > 4)
+
+Hall_members_83<- Hall_all_members %>% 
+  filter(congress == "83")
+
+Hall_votes_83<- Hall_votes %>% 
+  filter(congress == "83")
+
+Hall_votes_83_joined<- Hall_members_83 %>%
+  left_join(Hall_votes_83, by = 'icpsr') %>%
+  filter(rollnumber == '38'|
+           rollnumber == '50'|
+           rollnumber == '67'|
+           rollnumber == '90'|
+           rollnumber == '109'|
+           rollnumber == '144') %>% 
+  filter(cast_code == '6') %>% 
+  group_by(icpsr, bioname, state_abbrev, district_code, party_code, congress.x, nominate_dim1, nominate_dim2)%>% 
+  summarize(nay_no = n()) %>% 
+  filter(nay_no > 3)
+
+
+Hall_members_84<- Hall_all_members %>% 
+  filter(congress == "84")
+
+Hall_votes_84<- Hall_votes %>% 
+  filter(congress == "84")
+
+Hall_votes_84_joined<- Hall_members_84 %>%
+  left_join(Hall_votes_84, by = 'icpsr') %>%
+  filter(rollnumber == '2'|
+           rollnumber == '15'|
+           rollnumber == '34'|
+           rollnumber == '47'|
+           rollnumber == '55'|
+           rollnumber == '59'|
+           rollnumber == '108'|
+           rollnumber == '128') %>% 
+  filter(cast_code == '6') %>% 
+  group_by(icpsr, bioname, state_abbrev, district_code, party_code, congress.x, nominate_dim1, nominate_dim2)%>% 
+  summarize(nay_no = n()) %>% 
+  filter(nay_no > 4)
+
+
+key_votes_79_84<- rbind(Hall_votes_79_joined, Hall_votes_80_joined, Hall_votes_81_joined, 
+                        Hall_votes_82_joined, Hall_votes_83_joined, Hall_votes_84_joined)
+  
+term_total<- Hall_all_members %>% 
+  group_by(icpsr) %>% 
+  summarize(term_total_career= n())
+
+term_study<- Hall_all_members_79_84 %>% 
+  group_by(icpsr) %>% 
+  summarize(term_total_period= n())
+
+term_after<- Hall_all_members %>%
+  filter(congress > 84) %>% 
+  group_by(icpsr) %>% 
+  summarize(term_total_after= n())
+
+isolationists<- key_votes_79_84 %>% 
+  group_by(icpsr, bioname, party_code, state_abbrev, nominate_dim1, nominate_dim2) %>% 
+  summarize(total_nay = sum(nay_no)) %>% 
+  filter(party_code == "200") %>% 
+  left_join(term_total, by = "icpsr") %>% 
+  left_join(term_study, by = 'icpsr') %>% 
+  left_join(term_after, by = 'icpsr') %>% 
+  arrange(desc(total_nay))
+
+#Now for our interventionists
+
+Hall_members_79<- Hall_all_members %>%
+  filter(congress == "79")
+
+Hall_votes_79<- Hall_votes %>% 
+  filter(congress == "79")
+
+Hall_votes_79_joined<- Hall_members_79 %>%
+  left_join(Hall_votes_79, by = 'icpsr') %>% 
+  filter(rollnumber == '5'|
+           rollnumber == '17'|
+           rollnumber == '31'|
+           rollnumber == '47'|
+           rollnumber == '100'|
+           rollnumber == '194') %>% 
+  filter(cast_code == '1') %>% 
+  group_by(icpsr, bioname, state_abbrev, district_code, party_code, congress.x, nominate_dim1, nominate_dim2)%>% 
+  summarize(yay_no = n()) %>% 
+  filter(yay_no > 3)
+
+Hall_members_80<- Hall_all_members %>% 
+  filter(congress == "80")
+
+Hall_votes_80<- Hall_votes %>% 
+  filter(congress == "80")
+
+Hall_votes_80_joined<- Hall_members_80 %>%
+  left_join(Hall_votes_80, by = 'icpsr') %>%
+  filter(rollnumber == '37'|
+           rollnumber == '51'|
+           rollnumber == '82'|
+           rollnumber == '105'|
+           rollnumber == '147'|
+           rollnumber == '154'|
+           rollnumber == '158'|
+           rollnumber == '159') %>% 
+  filter(cast_code == '1') %>% 
+  group_by(icpsr, bioname, state_abbrev, district_code, party_code, congress.x, nominate_dim1, nominate_dim2)%>% 
+  summarize(yay_no = n()) %>% 
+  filter(yay_no > 4)
+
+Hall_members_81<- Hall_all_members %>% 
+  filter(congress == "81")
+
+Hall_votes_81<- Hall_votes %>% 
+  filter(congress == "81")
+
+Hall_votes_81_joined<- Hall_members_81 %>%
+  left_join(Hall_votes_81, by = 'icpsr') %>%
+  filter(rollnumber == '7'|
+           rollnumber == '43'|
+           rollnumber == '98'|
+           rollnumber == '123'|
+           rollnumber == '131'|
+           rollnumber == '196'|
+           rollnumber == '190'|
+           rollnumber == '269') %>% 
+  filter(cast_code == '1') %>% 
+  group_by(icpsr, bioname, state_abbrev, district_code, party_code, congress.x, nominate_dim1, nominate_dim2)%>% 
+  summarize(yay_no = n()) %>% 
+  filter(yay_no > 4)
+
+
+Hall_members_82<- Hall_all_members %>% 
+  filter(congress == "82")
+
+Hall_votes_82<- Hall_votes %>% 
+  filter(congress == "82")
+
+Hall_votes_82_joined<- Hall_members_82 %>%
+  left_join(Hall_votes_82, by = 'icpsr') %>%
+  filter(rollnumber == '35'|
+           rollnumber == '37'|
+           rollnumber == '85'|
+           rollnumber == '88'|
+           rollnumber == '100'|
+           rollnumber == '138'|
+           rollnumber == '153'|
+           rollnumber == '155') %>% 
+  filter(cast_code == '1') %>% 
+  group_by(icpsr, bioname, state_abbrev, district_code, party_code, congress.x, nominate_dim1, nominate_dim2)%>% 
+  summarize(yay_no = n()) %>% 
+  filter(yay_no > 4)
+
+Hall_members_83<- Hall_all_members %>% 
+  filter(congress == "83")
+
+Hall_votes_83<- Hall_votes %>% 
+  filter(congress == "83")
+
+Hall_votes_83_joined<- Hall_members_83 %>%
+  left_join(Hall_votes_83, by = 'icpsr') %>%
+  filter(rollnumber == '38'|
+           rollnumber == '50'|
+           rollnumber == '67'|
+           rollnumber == '90'|
+           rollnumber == '109'|
+           rollnumber == '144') %>% 
+  filter(cast_code == '1') %>% 
+  group_by(icpsr, bioname, state_abbrev, district_code, party_code, congress.x, nominate_dim1, nominate_dim2)%>% 
+  summarize(yay_no = n()) %>% 
+  filter(yay_no > 3)
+
+
+Hall_members_84<- Hall_all_members %>% 
+  filter(congress == "84")
+
+Hall_votes_84<- Hall_votes %>% 
+  filter(congress == "84")
+
+Hall_votes_84_joined<- Hall_members_84 %>%
+  left_join(Hall_votes_84, by = 'icpsr') %>%
+  filter(rollnumber == '2'|
+           rollnumber == '15'|
+           rollnumber == '34'|
+           rollnumber == '47'|
+           rollnumber == '55'|
+           rollnumber == '59'|
+           rollnumber == '108'|
+           rollnumber == '128') %>% 
+  filter(cast_code == '1') %>% 
+  group_by(icpsr, bioname, state_abbrev, district_code, party_code, congress.x, nominate_dim1, nominate_dim2)%>% 
+  summarize(yay_no = n()) %>% 
+  filter(yay_no > 4)
+
+
+key_yay_votes_79_84<- rbind(Hall_votes_79_joined, Hall_votes_80_joined, Hall_votes_81_joined, 
+                        Hall_votes_82_joined, Hall_votes_83_joined, Hall_votes_84_joined) 
+
+interventionists_1<- key_yay_votes_79_84 %>% 
+  filter(congress.x < 85) %>% 
+  group_by(icpsr, bioname, party_code, state_abbrev, nominate_dim1, nominate_dim2) %>% 
+  summarize(total_yay = sum(yay_no))%>% 
+  filter(party_code == "200")
+
+#Let's discover the isolationsts to flipped to the interventionst side
+the_flipped<- interventionists_1[match(isolationists$icpsr, interventionists_1$icpsr, nomatch=0),] 
+
+#Next lets find all the fence sitters in any given congress, those who failed to meet either our interventionist or isolationist standards. Way to not take a stand people.
+fence_sitter<- Hall_all_members_79_84 %>% 
+  anti_join(key_votes_79_84, by = 'icpsr') %>% 
+  anti_join(key_yay_votes_79_84, by = 'icpsr') %>% 
+  group_by(icpsr, bioname, state_abbrev, party_code, nominate_dim1, nominate_dim2) %>%
+  filter(party_code == 200) %>% 
+  summarize(term_no = n()) %>% 
+  distinct(icpsr, bioname, state_abbrev, party_code, nominate_dim1, nominate_dim2) %>% 
+  left_join(term_total, by = "icpsr") %>% 
+  left_join(term_study, by = 'icpsr') %>% 
+  left_join(term_after, by = 'icpsr')
+
+the_loyal<- isolationists %>%
+  anti_join(interventionists_1, by = 'icpsr')
+
+names(key_votes_79_84)[6]<-"congress"
+names(key_yay_votes_79_84)[6]<-"congress"
+
+#This is a dataset collected outside of R where I found out the careers of my various subjects ended.
+isolationists_fate_notes<- read.csv("C:/Users/bpbuc/Documents/Brandan's Stuff/_PhD Stuff/Dissertation Research/map/isolationists_fate_notes.csv")
+
+#There is still more work to do. Mainly, finding those reps who did not fit neatly into either of our three boxes. To find them, I joined the Isolationist and Interventionst vote totals to the master list of reps. From here I worked out of R, mainly in OpenRefine to handjam the needed data, that being which cohort did any given rep belong to in any given congressional session, isolationst, intervnetionist or noncommitted.
+Hall_all_members_79_84_vote_join<- Hall_all_members_79_84 %>%  
+  left_join(key_votes_79_84, by = c("icpsr", "congress")) %>% 
+  left_join(key_yay_votes_79_84, by = c("icpsr", "congress"))
+
+```
+
+<h3 align="center"> The Results, Big Picture </h3>
+
+Before diving deeper into the results let us take a look at this first step of analysis. Also, before moving out attention solely to the Republicans, some attention to the House as a whole is would be beneficial. As indicated from our secondary sources the isolationist cohorts within the two major parties were predominately, although not exclusively rightwing. The interventionist wing is stronger within the Democrats, and is spread over a larger ideological spectrum. On the Republican side the isolationist cohort is in a horseshoe pattern from left to right with an obvious tilt towards the latter. Republican isolations were mostly are found on the party’s economic and socially conservative fringes. Conversely, the interventionist cohort was mostly, although not entirely bunched to the party’s ideological center and left wing. Perhaps not surprisingly, the noncommitted, particularly within the GOP were arrayed, albeit with some overlap between our isolationists and interventionists cohorts. The figure below depicts these ideological trends and is a snapshot of entire period in question. As discussed above, these ideological cohorts were not static, so, now a look at how these groups changed over time.              
+
+```{r, layout="l-page", fig.cap= "This figure depicts the ideological orientation of the Republican and Democratic House representation from the 79th to 84th congress. Broadly speaking, with a few exceptions isolationists were located on the rightwing of each party, with the GOP containing significantly more. Data citation: Lewis, Jeffrey B., Keith Poole, Howard Rosenthal, Adam Boche, Aaron Rudkin, and Luke Sonnet (2020). Voteview: Congressional Roll-Call Votes Database. https://voteview.com/", echo= FALSE}
+
+key_votes_all %>%
+  filter(party_code == "Democrat" |
+         party_code == "Republican") %>% 
+  ggplot(aes(x= nominate_dim1, nominate_dim2, color= faction, shape= party_code)) + geom_point(size= 1.5, alpha= .75) +
+  labs(title = "Foreign Policy Divide within the House of Representatives",
+       subtitle = "79th through 84th Congresses, by Representative",
+       color = "Faction",
+       shape = "Party",
+       x = "<- Liberal      Economic/Redistributive      Conservative->",
+       y = "<- Liberal      Social Policy      Conservative->") +
+  scale_color_manual(labels = c("Noncommitted", "Interventionst", "Isolationist"),
+                     values = c("orange", "purple", "red"))+
+  theme_bw() 
+ 
+
+```
+
+Two things stand out. First, at no point does the isolationist faction within the Democratic party overtake their interventionist brethren. Second, the 81st congress was the highwater mark of the isolationism within the Republican party, despite losing seats within midwestern states, Illinois and Missouri. This was fleeting however because their gains came at the result of a massive Republican loss in the general election of 1948 which decided the 81th congress. Thereafter the trajectories of both would reverse until the isolationists returned to relative obscurity by 84th congress, hammered by resurgent interventionism within both political parties. How can this peak be explained, especially considering the overall losses endured by the GOP? The 81st congress’ orientation on foreign policy is explained in large part by the Korean War. Murray Rothbard highlights in his <i>Betrayal of the American Right</i>, that U.S. involvement on the Korean peninsula flipped, at least for a time, many self-described internationalist Republicans to the isolationist cause ^[Rothbard, 92]. The findings in this study bear that out, the Korean conflict initiated a spate of defections from the interventionists. Of the 281 Republican interventionists identified by this method, 52 were in the noncommitted category during the 81st congress, and another 45 voted with the isolationists. Of those 45, those 15 flipped back to the interventionists from the 82nd congress through to the 84th or through to the end of their respective careers. Furthermore, eight of those 15 of those only defected during 81st congress, having otherwise voted with the interventionists for every other session served. These findings suggest rather than drive the Republican party towards interventionism, the Korean War actually turned them away from it, at least for a time.      
+
+```{r, layout="l-page", fig.cap= "This is a line graph of the isolationist, interventionist and noncommitted cohorts within the Democratic and Republican parties from the 79th to 84th congresses. The Republican party contained a significantly larger cohort of isolationists whose number peaked during the 81st congress and decreased steadily thereafter. Data citation: Lewis, Jeffrey B., Keith Poole, Howard Rosenthal, Adam Boche, Aaron Rudkin, and Luke Sonnet (2020). Voteview: Congressional Roll-Call Votes Database. https://voteview.com/", echo= FALSE}
+
+key_votes_all %>% 
+  filter(party_code == 'Democrat' |
+         party_code == 'Republican') %>% 
+  distinct(congress, party_code, icpsr, bioname, nay_no, yay_no, faction) %>% 
+  group_by(congress, faction, party_code) %>% 
+  summarize(num= n()) %>% 
+  ggplot(aes(x = congress, y= num, color= faction)) + geom_point(size= 2) + geom_line(size= 0.5) + 
+  facet_wrap(~party_code) +
+  labs(title = "Foreign Policy Cohorts within the House of Representatives",
+       subtitle = "79th through 84th Congresses, by party",
+       color = "Cohort:",
+       x = "Congress",
+       y = "Number of Representatives in Cohort") + 
+  scale_color_manual(labels = c("Noncommitted", "Interventionst", "Isolationist"),
+                     values = c("orange", "purple", "red")) +
+  theme_classic() 
+
+```
+
+<h3 align="center"> Mapping Isolationism </h3>
+
+Before returning to the decline of isolationism, a spatial analysis of isolationist cohort is in order. The prominence of rural, Midwestern representatives is well documented within current historiography. However, using digital methods the disparity between the coasts and the heartland, urban centers and rural districts is even more apparent. The 131 representatives identified by this study hailed from 27 different states with Illinois (20), Ohio (12), Indiana (10), Michigan (10) and Pennsylvania (9) rounding out the top five. The cloistering of these individuals is even starker within states.  
+Republican isolationists from the 81st Congress, represented only 35 cities with a population above 50,000, the largest being Wichita, Kansas, population 168,000. Even within their middle America stronghold, city centers almost always elected interventionist Republicans or Democrats. Interventionists by contrast represented 154 cities over 50,000 including most of the large population centers in the country, many of those within the Midwest.            
+
+```{r, layout="l-page", fig.cap= "This is a map of midwestern isolationist Republican representation during the 81st congress, the cohort’s zenith. Isolationism enjoyed supported throughout the Midwest but almost predominately in the region’s rural environs. Midwestern population centers were dominated by interventionist Democrats and Republicans", echo= FALSE}
+
+include_graphics("C:/Users/bpbuc/Documents/Brandan's Stuff/_PhD Stuff/Dissertation Research/map/cong_map.jpg")
+
+```
+<h3 align="center"> Isolationism in Decline </h3>
+
+As we saw above the adherence to foreign and defense policy voting blocs was not static. Let’s take a closer look at the political orientations of the isolationist, interventionist and noncommitted cohorts within the Republican party. 
+
+```{r, layout="l-body-outset", echo= FALSE}
+
+paged_table(isolationists_final) %>% 
+  select(bioname, district_code, loyal, total_nay, total_yay, fate, Faction_79, Faction_80, Faction_81, Faction_82, Faction_83, Faction_84)
+```
+
+Of the 131 Republican isolationists identified by this methodology, 88 either flipped to the isolationist cohort or moderated their voting records by the 84th congress, and as noted above the impact of the Korean War was central to the surge in foreign policy opposition within the party.  The isolationist cohort hemorrhaged adherents, members who either moderated or flipped to the interventionists, session after session from the 82nd onward. Most of these 88 representatives constituted the left of center and center wings of Republican party. The isolationist cohort also lost relative to the gains made by interventionists within the party. The Republican party gained seats in the 82nd and 83rd congresses, and, in what is likely a reflection of popular will and shift in elite opinion, these representatives were overwhelmingly within the interventionist cohort. Between the 82nd and the 83rd congress alone, the Republican interventionist cohort gained 33 members to the isolationists mere five. The Midwest’s isolationist bent also began to erode. Among those interventionists’ gains were in Ohio (6 seats), Michigan (5), Illinois (6), and Indiana (4). A number of Republicans who were noncommitted prior to the 84th congress also joined the interventionists and swelled their numbers to 124 and all but completed the ascent of the interventionist wing of the party. 
+
+These Republicans, who either flipped from the isolationists, who were elected to the House by 84th congress joined the 183 interventionist Democrats and thereby solidified a new foreign policy paradigm. A consensus which would stand, largely unchallenged until Vietnam initiated a groundswell of political opposition, almost exclusively on the political left. However, on the right, the transformation of conservativism into an exclusively hawkish and internationalist political philosophy would remain unchallenged for far longer. Marginal disagreement would continue on the right, however these usually centered on issues of foreign aid, budgets and fiscal concerns, not on the larger concepts concerning America’s role in the world. Save for a few pockets of libertarians, foreign policy debate on the right would remain narrow until the Pat Buchannan primary campaigns of 1992 and 1996 which were largely motivated by the end of the Cold War. 
+
+```{r, layout="l-body-outset",fig.cap= "This scatterplot depicts the ideological orientation of the Republican party’s interventionist, isolationist, and noncommitted cohorts from the 81st through 84th congresses. As the isolationist cohort shrunk from congress to congress many of its more extreme members either retired or were defeated during general elections. Still more either moderated their voting records on foreign policy or flipped to the interventionists. Data citation: Lewis, Jeffrey B., Keith Poole, Howard Rosenthal, Adam Boche, Aaron Rudkin, and Luke Sonnet (2020). Voteview: Congressional Roll-Call Votes Database. https://voteview.com/", fig.height= 4, fig.width= 6, echo= FALSE}
+
+
+key_votes_all %>%
+  filter(party_code == 'Republican') %>% 
+  filter(congress == 81 |
+         congress == 82 |
+          congress == 83 |
+          congress == 84)%>% 
+  ggplot(aes(x= nominate_dim1, nominate_dim2, color= faction)) + facet_wrap(~congress) + geom_point(size= 1.5, alpha= 0.5) +
+  labs(title = "Foreign Policy Divide within Republican House Representation",
+       subtitle = "81 v. 84th Congresses, by Representative",
+       color = "Faction",
+       x = "<- Liberal      Economic/Redistributive      Conservative->",
+       y = "<- Liberal      Social Policy      Conservative->") +
+  scale_color_manual(labels = c("Noncommitted", "Interventionst", "Isolationist"),
+                     values = c("orange", "purple", "red"))+
+  theme_bw() 
+
+```
+<h3 align="center"> Even the Fringe has a Fringe </h3>
+
+With these defections, the remaining isolationists were further politically isolated (pun intended), and pushed further to the party's left and right wings. The isolationist cohort was a dying breed, politically…and literally. Of those who stayed the course through our period of study, 15 were defeated in general elections, nine retired, three were primaried, two died in office and one left his congressional seat for another office. Of these 22 isolationist Republican representatives who left office with their ideology intact only two were replaced by another isolationist. Of those were several heavyweights within the isolationist cohort such as Cecil William Bishop (IL-25) who served seven terms, five during our period of interest. Also, among them was proto-libertarian and personal friend to Murray Rothbard, Howard Homan Buffett (NE-2). This trend of replacement from isolationist to interventionist was not always unidirectional, several seats vacillated between the two, however the larger trend was one where interventionists or the noncommitted gained control of the Republican party and did so in relatively short order. The disappearance of isolationism from the republican party was party of a larger trend which saw the party tack to the ideological center, particularly on economic issues. The moderating of the GOP on domestic issues came at the cost of homogenizing foreign policy and national security perspectives. 
+
+```{r, layout="l-body-outset", fig.width=6, fig.height=6, fig.cap= "Each point represents a congressperson and is sized to depict their total nay count and is colorized to indicate the fate of their congressional career between the 79th and 84 congresses. Those isolationists who were closer to the party’s political center moderate their voting patterns on foreign policy or outright flipped to the interventionists. Those on the fringes often did not survive politically and found themselves unseated or elected to retire. Data citation: Lewis, Jeffrey B., Keith Poole, Howard Rosenthal, Adam Boche, Aaron Rudkin, and Luke Sonnet (2020). Voteview: Congressional Roll-Call Votes Database. https://voteview.com/", echo= FALSE}
+
+p<- isolationists_final %>%
+  ggplot(aes(x= nominate_dim1, y= nominate_dim2, color= fate, size = total_nay, label = bioname)) + geom_point(alpha= 0.70) + 
+  scale_color_brewer(palette="Set1") +
+  labs(title = "Fate of 'Isolationist' Republican Representatives",
+       subtitle = "79 through 84 Congresses, by Representative",
+       color = "",
+       caption = "Data available from UCLA's political science's voteview.com project",
+       x = "<- Liberal      Economic/Redistributive      Conservative->",
+       y = "<- Liberal      Social Policy      Conservative->") +
+  theme_bw() + scale_size_continuous(name = "",
+                                     breaks = c(4,10,15,20),
+                                     labels = c("4","10","15","20+"))
+
+
+ggplotly(p)
+
+```
+<h3 align="center"> The Remnant  </h3>
+
+Only 13 on our identified 131 isolationist congressional representatives made it through to the 84th congress with their ideology intact. Since our concern is continuity between the isolationism of the 1950s to later iterations of rightwing noninterventionism, we can further cull the herd by political orientation and career longevity. Of those 13, six do not make it into the into the 87th congress which was the first congressional session under the JFK administration. This choice, coincidentally, eliminates the last three liberal Republican isolationists from our list, Alvin Edward O’Konski (WI-10), Gardner Robert Withrow (WI-3) and Usher Lloyd Burdick (ND-At Large) as well as Cliff Clevenger, our one seed who racked up 36 nay votes. 
+
+This leaves us with seven individuals. Since we are looking for the hardcore isolationists, we can further eliminate those who waivered during their congressional careers and failed to meet our isolationist threshold at some point during our period of interest. 
+
+Now we are down to a mere three.
+
+These three representatives are the last of the old isolationist cohort of the Republican party who politically survived the conservative realignment of the 1950s, and who voted with the isolationist cohort throughout their time in congress. Below is a table of their names, states, districts, the total of terms they served after the 84th congress, the number of terms they served during the period of study, the total of terms they served through their careers and the total number of nays cast to the votes used in this study. From the data I cannot say for sure who wore that label into their later careers, that will require further research. We’ve touched on Gross and Siler, considering the place that they hold in dissent histography at this point I think that it is safe to say that they did not moderate their thinking. Siler retired from congress after his lonely vote against the Gulf of Tokin Resolution, reportedly out of disgust for the growing power of the executive branch on issues of war and peace. ^[Beito, David T & Beito, Linda Royster, "The Christian Conservative Who Opposed the Vietnam War," <i> History News Network</i> https://historynewsnetwork.org/article/28879] Gross remained in the House until January 1975 and remained…by a wide margin…the most fiscally conservative Representative. ^[Fun fact, according to VoteView’s data, Gross was the most fiscally conservative representative of the postwar era and was so by a wide margin. His voting record also constituted the 9th  most fiscally conservative the history of the U.S. House.] To expand my understanding of their influence upon later iterations of the rightwing thought will take a new strategy of conventional primary source research.
+
+Also, with these three we can see the benefits and pitfalls of using computational analysis. Of note is Clare Hoffman. Despite have consumed a robust amount of secondary source research his name did not immediately ring a bell with me. To see if I had simply missed him, I skimmed though Doeneke and Hogan. Hoffman appears in both to varying degrees. However, after reviewing the dissent literature, interestingly, Hoffman is conspicuous in his absence. This is somewhat surprising. Clare Hoffman voted nay to 35 out of the 44 votes used in this study (good for no. 2 on our isolationist leaderboard), he served 14 terms from 1935 until 1963. His career spaned the zenith of American noninterventionism in the 1930s, and its nadir and then he endured for three terms thereafter into the early 1960s. Despite an impressive career by isolationist standards he is absent from the accounts of rightwing noninterventionism given by Buchannan, Rothbard, Raimondo, and Kauffman. Why?
+
+It likely has something to do with Hoffman’s antisemitismmand predilection to conspiracy theory. It would appear that he has been written out of insider accounts of rightwing noninterventionism. Hoffman represents a facet of isolationism that recent commentators would like to forget, particularly for those with a direct rooting interest within the populist right and libertarian movements. His presence (or absence for that matter) here is indicative of the larger issues of antisemitism and identitarianism within dissent conservative and libertarian circles.
+
+Conversely, had I entered this project with a research agenda centered on antisemitism and the propensity for conspiracy theorizing I may not have discovered the careers of Eugene Siler and H.R. Gross. Men who did not display, as far as I know, the darker propensities of rightwing noninterventionism. Had I put these topics at the fore I would have found no shortage of unscrupulous characters, possible at the cost of discovering those isolationists who were not motivated by these beliefs. By crafting a research question which focused on the ideology's survival and approaching this topic with conventional as well as digital methods I was able to identify three congressional representatives who seem to characterize the themes of right-wing noninterventionism, fiscal restraint, federalism, and Christian piety…as well as racial anxiety, antisemitism, and conspiracy.
+
+```{r, layout="l-page", echo= FALSE}
+
+holdouts<- isolationists_final %>%
+  filter(fate == "Holdout") %>%
+  filter(term_total_after > 2) %>%
+  filter(Faction_82 != "Noncommitted" |
+         Faction_82 != "Noncommitted") %>% 
+  filter(Faction_83 != "Noncommitted") %>% 
+  arrange(desc(term_total_after)) %>% 
+  select(bioname, state_abbrev, district_code, term_total_after,term_total_period, term_total_career, total_nay, died)
+
+paged_table(holdouts)
+
+```
+
+There are still plenty of questions which remain after completing this analysis. For starters was my narrowing process accurate? While these three representatives remained in congress through to the JFK administration and beyond what of those who left congress but were still politically or ideationally active outside of government? From my secondary source readings, I have discovered that at least two of the isolationists from this period had personal connections to Murray Rothbard, those people being Siler and Buffett. After Buffett left office, he was active within the nascent libertarian movement. He contributed to the New Individualist Review; a journal published by students at the University of Chicago, a hotbed of Austria Economics, an ideological blood brother to rightwing noninterventionism. The journal was associated with such libertarian and conservative figures such as Friedrich Hayek, Milton Friedman, and Richard Weaver. ^[Gottfried, Paul <i> The Conservative Movement</i> (New York: Twayne Publishers, 1993) p.42] How many other of the committed isolationists stayed active in dissent circles after their careers in congress? A quick revisit to our data shows that 11 committed isolationists (those who never wavered in their voting records) survived into the Kennedy administration, albeit outside of congress. Below is a list of their names, the year of their death, state, district, total number of nay votes, total career terms, total terms served during our period of interest, and the mechanism of their departure from congress. 
+
+```{r, layout="l-page", echo= FALSE}
+
+outsiders<- isolationists_final %>%
+  filter(fate != "Holdout") %>% 
+  filter(fate != "Flipped or moderated") %>% 
+  filter(loyal == "Y") %>% 
+  filter(died > 1960) %>% 
+  select(bioname, died, state_abbrev, district_code, total_nay, term_total_career, term_total_period, fate) %>% 
+  arrange(desc(died))
+
+paged_table(outsiders)
+
+```  
+<h3 align="center"> Parting Thoughts </h3>
+
+  So far, the results of this work have been mixed. Recall that this analysis had two purposes. One, attempt to gain a greater resolution of the decline of isolationism by using digital analysis applied to house voting records. Two, use said analysis to identify which isolationists survived the Republican realignment with their foreign policy politics intact. With regard to the former…I am fairly skeptical that my work has made any significant contributions, nor could it with further methodological input. Defining and measuring “isolationism” just as pointed out by Doenecke is a difficult task given the groups incoherence. At the least this method has generated some possible research angles, particularly into those isolationist reps who lost reelection or who decided to retire. Although, on the other hand I am bullish on the idea these methods provided a research tool. As seen above this methodology was valuable in that it identified representatives hitherto unknown to me, and placed them and others into a larger voting context which is searchable and can be visualized. It has created a database which can be used to quickly identify representatives, their isolationist or interventionist scores, and the course of their careers through this pivotal window of time. If even my methodologies are less than perfect, I think that picture it created is active enough to serve as a means of asking further questions for conventional research.
+  
+## Acknowledgments {.appendix}
+
+Code available at https://github.com/bbuck1/computing_isolationism
+
+Analysis was primarily conducted with the R programming language in R Studio. Additional analysis was conducted in QGIS.
