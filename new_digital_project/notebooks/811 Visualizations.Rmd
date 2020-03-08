@@ -1,0 +1,226 @@
+---
+title: "811 Visualizations"
+author: "Brandan P Buck"
+date: "3/2/2020"
+output: html_document
+---
+
+```{r setup, include=TRUE}
+
+library(dplyr) 
+
+library(ggplot2)
+library(ggExtra)
+library(jpeg)
+library(knitr)
+library(pals)
+library(grid)
+library(tidyverse)
+library(RColorBrewer)
+
+
+key_votes<- read.csv("C:/Users/bpbuc/Documents/Brandan's Stuff/_PhD Stuff/Dissertation Research/new_digital_project/clean_data/key_votes_new.csv")
+
+key_votes_79_88_list<- read.csv("C:/Users/bpbuc/Documents/Brandan's Stuff/_PhD Stuff/Dissertation Research/new_digital_project/clean_data/key_votes_79_88_list.csv")
+
+Hall_all_members<- read.csv("C:/Users/bpbuc/Documents/Brandan's Stuff/_PhD Stuff/Dissertation Research/new_digital_project/raw_data/HSall_members.csv")
+
+
+```
+
+## The Data
+
+The cleaning process of this data can be found within the "cleaning" folder of the project.
+
+## Plots I intend to use in the 811 paper
+
+I intend to use the following two plots to orientate the reader of my 811 paper. The narrative begins in the 85th congress and ends in the 90th, therefore the plots are useful to provide the backstory and illustrate the political decline of the Old Isolationist right. The plots also illustrate the relative support/opposition to the three categories of legislation and the gaps between them. The scatterplot makes the argument that foreign aid spending enjoyed relatively weak support on the right…in both parties, but primarily in the GOP. Lastly, the plots, particularly the line plot will set up the latter narrative/plots which concern the Republican revolt on foreign aid. 
+
+```{r pressure, echo=TRUE}
+label<- c(econ = "Foreign Aid", gov = "Foreign Policy", mil = "Military Policy and Appropriations")
+bb <- c(1, 5, 10, 15, 20)
+ll <- c("1", "5", "10", "15", "20+")
+
+key_votes %>%
+  filter(congress > 85) %>% 
+  filter(party_code == "Democrat" |
+           party_code ==  "Republican") %>% 
+  filter(cohort == "int") %>% 
+  group_by(cohort, party_code, nominate_dim1, nominate_dim2, type) %>% 
+  summarize(num = n()) %>% 
+  ggplot(aes(x= nominate_dim1, y= nominate_dim2, size = num, color = party_code)) + geom_point(alpha = .70) + 
+  facet_wrap(~type, labeller=labeller(type = label)) +
+  geom_hline(yintercept = 0, linetype="dashed", color = "grey", size = 1) +
+  geom_vline(xintercept = 0, linetype="dashed", color = "grey", size = 1) +
+  annotate("rect", xmin = 0, xmax = 1, ymin = 0, ymax = 1,
+           alpha = .2) +
+  labs(title = "Foreign Policy Support, 79th through 84th Congress ",
+       subtitle = "By U.S. House Representative, Party, and Bill Type ",
+       color = "Party",
+       x = "<- Liberal      Economic/Redistributive      Conservative->",
+       y = "<- Liberal      Social Policy      Conservative->") +
+  scale_color_manual(labels = c("Democrat", "Republican"),
+                     values = c("blue", "red")) +
+  scale_size_continuous(name = "Yay Votes",
+                        breaks = bb,
+                        labels = ll) +
+  theme_bw(base_size = 20) +
+  guides(color = guide_legend(override.aes = list(size=5))) #I increased the size so the text was larger when exported as a jpeg
+```
+
+```{r}
+
+bill_total<- key_votes_79_88_list %>% 
+  group_by(congress, type) %>% 
+  summarize(number = n())
+
+
+key_votes %>%
+  filter(party_code ==  "Republican") %>%
+  filter(congress < 85) %>% 
+  group_by(cohort, congress, party_code, type) %>%
+  summarize(vote = n()) %>% 
+  left_join(bill_total, by = c("congress", "type")) %>% 
+  mutate(avg = vote / number) %>% 
+  ggplot(aes(x= congress, y= avg, color = cohort)) + geom_point(size= 2) + geom_line(size= 0.5) +      facet_wrap(~type, labeller=labeller(type = label)) +
+  labs(title = "Voting Patterns of Republican Representatives",
+       subtitle = "By Type and Vote",
+       color = "Vote Type",
+       shape = "Noninterventionist Votes",
+       x = "Congress",
+       y = "Average Vote Total Per Bill") +
+  scale_color_manual(labels = c("Support", "Opposition", "Noncommitted"),
+                     values = c("green", "red", "orange"))+
+  theme_bw() 
+
+```
+
+For comparison purposes I decided to include the same plot but with the Democratic party. I am not sure if I will include in the paper, but it does illustrate that the Dems, by comparison supported the full suite of Cold War legislation.
+
+```{r}
+bill_total<- key_votes_79_88_list %>% 
+  group_by(congress, type) %>% 
+  summarize(number = n())
+
+
+key_votes %>%
+  filter(party_code ==  "Democrat") %>%
+  filter(congress < 85) %>% 
+  group_by(cohort, congress, party_code, type) %>%
+  summarize(vote = n()) %>% 
+  left_join(bill_total, by = c("congress", "type")) %>% 
+  mutate(avg = vote / number) %>% 
+  ggplot(aes(x= congress, y= avg, color = cohort)) + geom_point(size= 2) + geom_line(size= 0.5) + facet_wrap(~type, labeller=labeller(type = label)) +
+  labs(title = "Voting Patterns by Democratic Representatives",
+       subtitle = "By Type and Vote",
+       color = "Vote Type",
+       shape = "Noninterventionist Votes",
+       x = "Congress",
+       y = "Average Vote Total Per Bill") +
+  scale_color_manual(labels = c("Support", "Opposition", "Noncommitted"),
+                     values = c("green", "red", "orange"))+
+  theme_bw() 
+
+
+```
+
+Vote on the Eisenhower Doctrine (85 H.J.Res. 117). One of the key foreign policy votes prior to the Gulf of Tonkin Resolution. I intend to use this plot to argue that under certain conditions, the Old Isolationists were still prone to vote against measures which vested power within the executive, even, in as in this case if POTUS is of the same party. The plot also illustrates that Republican opposition, was, with a few exceptions clustered on the party’s right wing.  
+
+
+```{r}
+
+key_votes %>% 
+  filter(congress == "85") %>% 
+  filter(rollnumber == "3") %>%
+  ggplot(aes(x= nominate_dim1, y= nominate_dim2, color = cohort, shape = party_code)) + 
+  geom_point(size = 2, alpha = .7) +
+  geom_hline(yintercept = 0, linetype="dashed", color = "grey", size = 1) +
+  geom_vline(xintercept = 0, linetype="dashed", color = "grey", size = 1) +
+  labs(title = "House Vote on the Eisenhower Doctrine (85 H.J.Res. 117)",
+       subtitle = "By Party and Vote",
+       color = "Cohort",
+       shape = "Party",
+       x = "<- Liberal      Economic/Redistributive      Conservative->",
+       y = "<- Liberal      Social Policy      Conservative->") +
+  scale_color_manual(labels = c("Yay", "Nay", "No Vote"),
+                     values = c("green", "red", "orange"))+
+  theme_bw() 
+
+```
+I intend to use this plot to show how Republican opposition to foreign aid grew as the LBJ administration  wore on.
+
+```{r}
+econ_year<- key_votes_79_88_list %>% 
+  group_by(congress, type) %>% 
+  filter(type == "econ") %>% 
+  summarize(number = n())
+
+key_votes %>%
+  filter(party_code == "Democrat" |
+           party_code ==  "Republican") %>%
+  filter(type == "econ") %>% 
+  group_by(cohort, congress, party_code) %>%
+  summarize(vote = n()) %>% 
+  left_join(econ_year, by = "congress") %>% 
+  mutate(avg = vote / number) %>% 
+  ggplot(aes(x= congress, y= avg, color = cohort)) + geom_point(size= 2) + geom_line(size= 0.5) + facet_wrap(~party_code) +
+  labs(title = "Foreign Aid Votes the House of Representatives",
+       subtitle = "By Party and Vote Type",
+       color = "Vote Type",
+       shape = "Noninterventionist Votes",
+       x = "Congress",
+       y = "Average Vote Total Per Bill") +
+  scale_color_manual(labels = c("Support", "Opposition", "Noncommitted"),
+                     values = c("green", "Red", "orange"))+
+  theme_bw() 
+
+```
+
+This plot of the voting pattern on the Foreign Assistance Act of 1961 (87 H.R. 8400) is useful because it establishes rough base line which is useful to juxtapose with… 
+
+```{r}
+
+key_votes %>% 
+  filter(congress == "87") %>% 
+  filter(bill_no == "HR8400") %>% 
+  ggplot(aes(x= nominate_dim1, y= nominate_dim2, color = cohort, shape = party_code)) + 
+  geom_point(size = 2, alpha = .7) +
+  geom_hline(yintercept = 0, linetype="dashed", color = "grey", size = 1) +
+  geom_vline(xintercept = 0, linetype="dashed", color = "grey", size = 1) +
+  labs(title = "House Vote on Foreign Assistance Act of 1961 (87 H.R. 8400)",
+       subtitle = "By Party and Vote",
+       color = "Cohort",
+       shape = "Party",
+       x = "<- Liberal      Economic/Redistributive      Conservative->",
+       y = "<- Liberal      Social Policy      Conservative->") +
+  scale_color_manual(labels = c("Yay", "Nay", "No Vote"),
+                     values = c("green", "red", "orange"))+
+  theme_bw() 
+
+
+
+```
+
+...the House Vote to Recommit the Foreign Assistance Act of 1968 (87 S. 2996). These two plots show the Republican revolt over foreign aid which occurred during the late 1960s. The plot also depicts the means of that revolt, moderate and left wing Republicans, along with some Democrats who defected to cut foreign aid spending.
+
+```{r}
+
+key_votes %>% 
+  filter(congress == "90") %>% 
+  filter(rollnumber == "390") %>%
+  ggplot(aes(x= nominate_dim1, y= nominate_dim2, color = cohort, shape = party_code)) + 
+  geom_point(size = 2, alpha = .7) +
+  geom_hline(yintercept = 0, linetype="dashed", color = "grey", size = 1) +
+  geom_vline(xintercept = 0, linetype="dashed", color = "grey", size = 1) +
+  labs(title = "House Vote to Recommit the Foreign Assistance Act of 1968 (87 S. 2996)",
+       subtitle = "By Party and Vote",
+       color = "Cohort",
+       shape = "Party",
+       x = "<- Liberal      Economic/Redistributive      Conservative->",
+       y = "<- Liberal      Social Policy      Conservative->") +
+  scale_color_manual(labels = c("Yay", "Nay", "No Vote"),
+                     values = c("green", "red", "orange")) +
+  theme_bw()
+
+```
+
