@@ -66,21 +66,20 @@ key_votes %>%
 
 
 key_votes %>%
-  filter(congress > 84) %>% 
-  filter(congress < 89) %>% 
+  filter(congress > 85) %>% 
   filter(party_code == "Democrat" |
            party_code ==  "Republican") %>% 
   filter(cohort == "int") %>% 
   group_by(cohort, party_code, nominate_dim1, nominate_dim2, type) %>% 
   summarize(num = n()) %>% 
-  ggplot(aes(x= nominate_dim1, y= nominate_dim2, size = num, color = party_code)) + geom_point(alpha = .50) + 
+  ggplot(aes(x= nominate_dim1, y= nominate_dim2, size = num, color = party_code)) + geom_point(alpha = .70) + 
   facet_wrap(~type, labeller=labeller(type = label)) +
   geom_hline(yintercept = 0, linetype="dashed", color = "grey", size = 1) +
   geom_vline(xintercept = 0, linetype="dashed", color = "grey", size = 1) +
   annotate("rect", xmin = 0, xmax = 1, ymin = 0, ymax = 1,
            alpha = .2) +
-  labs(title = "Foreign Policy Support, 85th through 88th Congressess",
-       subtitle = "By Representative, Party, and Bill Type ",
+  labs(title = "Foreign Policy Support, 79th through 84th Congress ",
+       subtitle = "By U.S. House Representative, Party, and Bill Type ",
        color = "Party",
        x = "<- Liberal      Economic/Redistributive      Conservative->",
        y = "<- Liberal      Social Policy      Conservative->") +
@@ -92,20 +91,8 @@ key_votes %>%
   theme_bw(base_size = 20) +
   guides(color = guide_legend(override.aes = list(size=5)))
 
-key_votes %>%
-  filter(congress > 84 |
-           congress < 89) %>% 
-  filter(party_code == "Democrat" |
-           party_code ==  "Republican") %>% 
-  filter(type == "econ") %>% 
-  group_by(cohort, congress, party_code) %>% 
-  summarize(num = n()) %>% 
-  ggplot(aes(x= congress, y= num, color = cohort)) + geom_point(size= 2) + geom_line(size= 0.5) + 
-  facet_wrap(~party_code)
-  
-
 #Right wing support for foreign aid
-key_votes %>%
+right_wing_support_for_Aid<- key_votes %>%
   filter(congress > 84 |
          congress < 89) %>% 
   filter(cohort == "int") %>%
@@ -118,7 +105,7 @@ key_votes %>%
   mutate(per_term = num / term_total) %>% 
   arrange(desc(num))
   
-  write.csv("right_wing_support_for_Aid.csv")
+  #write.csv("right_wing_support_for_Aid.csv")
 
 key_votes_79_88_list %>% 
   filter(congress > 84) %>%
@@ -139,13 +126,13 @@ key_votes %>%
   left_join(bill_total, by = c("congress", "type")) %>% 
   mutate(avg = vote / number) %>% 
   ggplot(aes(x= congress, y= avg, color = cohort)) + geom_point(size= 2) + geom_line(size= 0.5) + facet_wrap(~type) +
-  labs(title = "Votes the House of Representatives",
+  labs(title = "Average Republican Vote in the House of Representatives",
        subtitle = "By type and vote",
        color = "Vote Type",
        shape = "Noninterventionist Votes",
        x = "Congress",
        y = "Average Vote Total Per Bill") +
-  scale_color_manual(labels = c("Yay", "Nay", "Noncommitted"),
+  scale_color_manual(labels = c("Support", "Opposition", "Noncommitted"),
                      values = c("green", "red", "orange"))+
   theme_bw() 
 
@@ -169,23 +156,8 @@ key_votes %>%
        shape = "Noninterventionist Votes",
        x = "Congress",
        y = "Average Vote Total Per Bill") +
-  scale_color_manual(labels = c("Yay", "Nay", "Noncommitted"),
-                     values = c("green", "orange", "yellow"))+
-  theme_bw() 
-
-key_votes %>% 
-  filter(cohort == "iso") %>% 
-  filter(party_code == "Republican") %>% 
-  group_by(congress, type) %>%
-  summarize(num = n()) %>% 
-  ggplot(aes(x= congress, y= num, color = type)) + geom_point(size= 2) + geom_line(size= 0.5) +
-  labs(title = "Republican Nay on Foreign Policy Votes",
-       subtitle = "By Type",
-       color = "Type",
-       x = "Gongress",
-       y = "Number of Votes Per Type") +
-  scale_color_manual(labels = c("Foreign Aid", "Foreign Policy Initiatives", "Military Policy and Appropriations"),
-                     values = c("green", "orange", "blue"))+
+  scale_color_manual(labels = c("Support", "Opposition", "Noncommitted"),
+                     values = c("green", "red", "orange"))+
   theme_bw() 
 
 key_votes %>% 
@@ -215,6 +187,11 @@ term_total<- Hall_all_members %>%
   group_by(icpsr) %>% 
   summarize(term_total = n())
 
+term_after<- Hall_all_members %>%
+  filter(congress > 84) %>% 
+  group_by(icpsr) %>% 
+  summarize(term_total_after= n())
+
 leaderboard<- key_votes %>% 
   filter(party_code == "Republican") %>%
   filter(cohort == "iso") %>% 
@@ -222,7 +199,21 @@ leaderboard<- key_votes %>%
   summarize(no = n()) %>% 
   arrange(desc(no)) %>% 
   left_join(term_total, by = 'icpsr') %>% 
-  mutate(nay_per = no / term_total)
+  mutate(nay_per = no / term_total) %>% 
+  left_join(term_after, by = "icpsr")
+
+write.csv(leaderboard, "leaderboad.csv")
+
+leaderboard_84_on<- key_votes %>% 
+  filter(party_code == "Republican") %>%
+  filter(type != "mil") %>% 
+  filter(cohort == "iso") %>% 
+  group_by(icpsr, bioname, nominate_dim1, nominate_dim2, state_abbrev) %>% 
+  summarize(no = n()) %>% 
+  arrange(desc(no)) %>% 
+  left_join(term_total, by = 'icpsr') %>% 
+  mutate(nay_per = no / term_total) %>% 
+  left_join(term_after, by = "icpsr")
 
 leaderboard_wo_mil<- key_votes %>% 
   filter(party_code == "Republican") %>%
@@ -254,18 +245,6 @@ leaderboard_int_aid<- key_votes %>%
   arrange(desc(no)) %>% 
   left_join(term_total, by = 'icpsr') %>% 
   mutate(yay_per = no / term_total)
-
-key_votes %>%
-  filter(congress > 84) %>% 
-  filter(party_code == "Democrat" |
-           party_code ==  "Republican") %>% 
-  group_by(icpsr, bioname, party_code, nominate_dim1, nominate_dim2, cohort) %>% 
-  summarize(num = n()) %>% 
-  filter(cohort == "int") %>% 
-  ggplot(aes(x= nominate_dim1, y= nominate_dim2, shape = party_code, color = num)) + geom_point(size = 3) +
-  geom_hline(yintercept = 0, linetype="dashed", color = "grey", size = 1) +
-  geom_vline(xintercept = 0, linetype="dashed", color = "grey", size = 1) +
-  scale_color_gradient(low="red", high="green")
 
 key_votes %>% 
   filter(congress == "87") %>% 
@@ -368,4 +347,110 @@ post_88_holdouts<- Hall_all_members %>%
          icpsr == "9578" |
          icpsr == "9578")
 
+bill_total<- key_votes_79_88_list %>% 
+  group_by(congress, type) %>% 
+  summarize(number = n())
 
+
+key_votes %>%
+  filter(nominate_dim1 > 0) %>% 
+  filter(nominate_dim2 > 0) %>% 
+  filter(party_code == "Republican") %>% 
+  group_by(cohort, congress, type) %>%
+  summarize(vote = n()) %>% 
+  left_join(bill_total, by = c("congress", "type")) %>% 
+  mutate(avg = vote / number) %>% 
+  ggplot(aes(x= congress, y= avg, color = cohort)) + geom_point(size= 2) + geom_line(size= 0.5) +      
+  facet_wrap(~type, labeller=labeller(type = label)) +
+  labs(title = "Voting Patterns of Right-Wing Republicans",
+       subtitle = "By Type and Vote",
+       color = "Vote Type",
+       x = "Congress",
+       y = "Average Vote Total Per Bill") +
+  scale_color_manual(labels = c("Support", "Opposition", "Noncommitted"),
+                     values = c("green", "red", "orange"))+
+  theme_bw() 
+
+key_votes %>%
+  filter(nominate_dim2 < 0) %>% 
+  filter(party_code == "Republican") %>% 
+  group_by(cohort, congress, type) %>%
+  summarize(vote = n()) %>% 
+  left_join(bill_total, by = c("congress", "type")) %>% 
+  mutate(avg = vote / number) %>% 
+  ggplot(aes(x= congress, y= avg, color = cohort)) + geom_point(size= 2) + geom_line(size= 0.5) +      
+  facet_wrap(~type, labeller=labeller(type = label)) +
+  labs(title = "Voting Patterns of Centrist & Left-Wing Republicans",
+       subtitle = "By Type and Vote",
+       color = "Vote Type",
+       x = "Congress",
+       y = "Average Vote Total Per Bill") +
+  scale_color_manual(labels = c("Support", "Opposition", "Noncommitted"),
+                     values = c("green", "red", "orange"))+
+  theme_bw() 
+
+key_votes %>%
+  filter(nominate_dim1 > 0) %>% 
+  filter(nominate_dim2 > 0) %>% 
+  filter(party_code == "Democrat") %>% 
+  group_by(cohort, congress, type) %>%
+  summarize(vote = n()) %>% 
+  left_join(bill_total, by = c("congress", "type")) %>% 
+  mutate(avg = vote / number) %>% 
+  ggplot(aes(x= congress, y= avg, color = cohort)) + geom_point(size= 2) + geom_line(size= 0.5) +      
+  facet_wrap(~type, labeller=labeller(type = label)) +
+  labs(title = "Voting Patterns of Right-Wing Democrats",
+       subtitle = "By Type and Vote",
+       color = "Vote Type",
+       x = "Congress",
+       y = "Average Vote Total Per Bill") +
+  scale_color_manual(labels = c("Support", "Opposition", "Noncommitted"),
+                     values = c("green", "red", "orange"))+
+  theme_bw() 
+
+key_votes %>%
+  filter(nominate_dim1 > 0) %>% 
+  filter(nominate_dim2 > 0) %>% 
+  filter(party_code != 329) %>% 
+  group_by(cohort, congress, type, party_code) %>%
+  filter(type == "econ") %>%
+  summarize(vote = n()) %>% 
+  left_join(bill_total, by = c("congress", "type")) %>% 
+  mutate(avg = vote / number) %>% 
+  ggplot(aes(x= congress, y= avg, color = cohort)) + geom_point(size= 2) + geom_line(size= 0.5) +    
+  facet_wrap(~party_code) +
+  labs(title = "Voting Patterns of Right-Wing Representatives on Foreign Aid",
+       subtitle = "By Party",
+       color = "Vote Type",
+       x = "Congress",
+       y = "Average Vote Total Per Bill") +
+  scale_color_manual(labels = c("Support", "Opposition", "Noncommitted"),
+                     values = c("green", "red", "orange"))+
+  theme_bw() 
+
+key_votes %>%
+  filter(nominate_dim1 > 0) %>% 
+  filter(nominate_dim2 > 0) %>% 
+  filter(party_code != 329) %>% 
+  distinct(icpsr,congress, party_code) %>% 
+  group_by(congress, party_code) %>% 
+  summarize(number = n()) %>% 
+  ggplot(aes(x= congress, y= number, color = party_code)) + geom_point(size= 2) + geom_line(size= 0.5) +
+  labs(title = "Size of Right-Wing Cohort within Republican and Democratic Parties",
+       subtitle = "79 to 90 Congress",
+       color = "Party",
+       x = "Congress",
+       y = "Number of Representatives") +
+  scale_color_manual(labels = c("Democrat", "Republican"),
+                     values = c("blue", "red")) +
+  theme_bw()
+
+key_votes %>%
+  filter(party_code ==  "Republican") %>% 
+  filter(cohort == "iso") %>%
+  filter(type == "econ") %>% 
+  group_by(cohort, party_code, nominate_dim1, nominate_dim2) %>% 
+  summarize(num = n()) %>% 
+  ggplot(aes(x= nominate_dim1, y= nominate_dim2, size = num)) + geom_point(alpha = .50) + 
+  geom_hline(yintercept = 0, linetype="dashed", color = "grey", size = 1) +
+  geom_vline(xintercept = 0, linetype="dashed", color = "grey", size = 1)
