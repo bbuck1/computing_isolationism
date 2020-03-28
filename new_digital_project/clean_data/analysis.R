@@ -380,14 +380,30 @@ key_votes %>%
   mutate(avg = vote / number) %>% 
   ggplot(aes(x= congress, y= avg, color = cohort)) + geom_point(size= 2) + geom_line(size= 0.5) +      
   facet_wrap(~type, labeller=labeller(type = label)) +
-  labs(title = "Voting Patterns of Centrist & Left-Wing Republicans",
+  labs(title = "Voting Patterns of Moderate & Left-Wing Republicans",
        subtitle = "By Type and Vote",
        color = "Vote Type",
        x = "Congress",
        y = "Average Vote Total Per Bill") +
   scale_color_manual(labels = c("Support", "Opposition", "Noncommitted"),
                      values = c("green", "red", "orange"))+
-  theme_bw() 
+  theme_bw()
+
+key_votes %>%
+  group_by(congress, type, cohort) %>%
+  summarize(vote = n()) %>% 
+  left_join(bill_total, by = c("congress", "type")) %>% 
+  mutate(avg = vote / number) %>% 
+  ggplot(aes(x= congress, y= avg, color = cohort)) + geom_point(size= 2) + geom_line(size= 0.5) +      
+  facet_wrap(~type, labeller=labeller(type = label)) +
+  labs(title = "Voting Patterns of the House of Representatives",
+       subtitle = "By Type and Vote",
+       color = "Vote Type",
+       x = "Congress",
+       y = "Average Vote Total Per Bill") +
+  scale_color_manual(labels = c("Support", "Opposition", "Noncommitted"),
+                     values = c("green", "red", "orange"))+
+  theme_bw()
 
 key_votes %>%
   filter(nominate_dim1 > 0) %>% 
@@ -426,7 +442,29 @@ key_votes %>%
        y = "Average Vote Total Per Bill") +
   scale_color_manual(labels = c("Support", "Opposition", "Noncommitted"),
                      values = c("green", "red", "orange"))+
-  theme_bw() 
+  theme_bw()
+
+key_votes %>%
+  filter(nominate_dim1 < 0 |
+         nominate_dim2 < 0) %>%
+  filter(party_code == "Democrat" |
+         party_code == "Republican") %>% 
+  group_by(cohort, congress, type, party_code) %>%
+  filter(type == "econ") %>%
+  summarize(vote = n()) %>% 
+  left_join(bill_total, by = c("congress", "type")) %>% 
+  mutate(avg = vote / number) %>% 
+  ggplot(aes(x= congress, y= avg, color = cohort)) + geom_point(size= 2) + geom_line(size= 0.5) +    
+  facet_wrap(~party_code) +
+  labs(title = "Voting Patterns of Left-Wing & Centrist Representatives on Foreign Aid",
+       subtitle = "By Party",
+       color = "Vote Type",
+       x = "Congress",
+       y = "Average Vote Total Per Bill") +
+  scale_color_manual(labels = c("Support", "Opposition", "Noncommitted"),
+                     values = c("green", "red", "orange"))+
+  theme_bw()
+
 
 key_votes %>%
   filter(nominate_dim1 > 0) %>% 
@@ -454,3 +492,34 @@ key_votes %>%
   ggplot(aes(x= nominate_dim1, y= nominate_dim2, size = num)) + geom_point(alpha = .50) + 
   geom_hline(yintercept = 0, linetype="dashed", color = "grey", size = 1) +
   geom_vline(xintercept = 0, linetype="dashed", color = "grey", size = 1)
+
+key_votes_tally<- key_votes %>%
+  filter(congress == 84) %>% 
+  filter(cohort == "iso") %>% 
+  group_by(icpsr, bioname, state_abbrev, party_code, district_code, nominate_dim1, nominate_dim2) %>% 
+  summarize(num = n())
+
+write.csv(key_votes_tally, "key_votes_tally.csv")
+
+key_votes_tally %>% 
+  group_by(state_abbrev) %>% 
+  summarize(num = n()) %>% 
+  arrange(desc(num))
+
+key_votes_tally %>% 
+  group_by(party_code) %>% 
+  summarize(num = n()) %>% 
+  arrange(desc(num))
+
+
+key_votes_tally %>%
+  group_by(party_code) %>% 
+  summarize(num = n()) %>% 
+  mutate(avg = num / 12)
+
+
+
+Hall_all_members %>% 
+  filter(icpsr == 9578) %>% 
+  group_by(icpsr) %>% 
+  summarize(term_no = n())

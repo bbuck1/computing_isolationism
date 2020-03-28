@@ -1,0 +1,183 @@
+icpsr,bioname,state_abbrev,party_code,district_code,num
+2,"ABBITT, Watkins Moorman",VA,Democrat,4,4
+13,"ABERNETHY, Thomas Gerstle",MS,Democrat,1,5
+18,"ADAIR, Edwin Ross",IN,Republican,4,4
+82,"ALEXANDER, Hugh Quincy",NC,Democrat,9,5
+93,"ALGER, Bruce Reynolds",TX,Republican,5,5
+158,"ANDERSEN, Herman Carl",MN,Republican,7,6
+188,"ANDRESEN, August Herman",MN,Republican,1,2
+195,"ANDREWS, George William",AL,Democrat,3,4
+226,"ARENDS, Leslie Cornelius",IL,Republican,17,1
+270,"ASHMORE, Robert Thomas",SC,Democrat,4,4
+339,"BAILEY, Cleveland Monroe",WV,Democrat,3,5
+364,"BAKER, Howard Henry",TN,Republican,2,1
+431,"BARDEN, Graham Arthur",NC,Democrat,3,6
+504,"BASS, Ross",TN,Democrat,6,3
+521,"BAUMHART, Albert David, Jr.",OH,Republican,13,3
+550,"BEAMER, John Valentine",IN,Republican,5,5
+590,"BELCHER, Page Henry",OK,Republican,1,5
+608,"BELL, John Junior",TX,Democrat,14,4
+639,"BENNETT, John Bonifas",MI,Republican,12,5
+652,"BENTLEY, Alvin Morell",MI,Republican,8,2
+672,"BERRY, Ellis Yarnal",SD,Republican,2,6
+680,"BETTS, Jackson Edward",OH,Republican,8,4
+798,"BLITCH, Iris Faircloth",GA,Democrat,8,4
+846,"BONNER, Herbert Covington",NC,Democrat,1,4
+868,"BOSCH, Albert Henry",NY,Republican,5,5
+891,"BOW, Frank Townsend",OH,Republican,16,6
+986,"BRAY, William Gilmer",IN,Republican,7,4
+1081,"BROOKS, Overton",LA,Democrat,4,5
+1104,"BROWN, Clarence J.",OH,Republican,7,5
+1152,"BROWNSON, Charles Bruce",IN,Republican,11,4
+1215,"BUDGE, Hamer Harold",ID,Republican,2,5
+1254,"BURDICK, Usher Lloyd",ND,Republican,0,6
+1282,"BURLESON, Omar Truman",TX,Democrat,17,1
+1328,"BUSH, Alvin Ray",PA,Republican,17,1
+1371,"BYRNES, John William",WI,Republican,8,1
+1512,"CARLYLE, Frank Ertel",NC,Democrat,7,5
+1610,"CEDERBERG, Elford Albin",MI,Republican,10,2
+1667,"CHASE, Jackson Burton",NE,Republican,2,4
+1684,"CHENOWETH, John Edgar",CO,Republican,3,1
+1722,"CHURCH, Marguerite Stitt",IL,Republican,13,5
+1839,"CLEVENGER, Cliff",OH,Republican,5,6
+1952,"COLMER, William Meyers",MS,Democrat,6,4
+2032,"COOLEY, Harold Dunbar",NC,Democrat,4,2
+2038,"COON, Samuel Harrison",OR,Republican,2,4
+2227,"CRUMPACKER, Shepard J., Jr.",IN,Republican,3,6
+2256,"CUNNINGHAM, Paul Harvey",IA,Republican,5,1
+2275,"CURTIS, Thomas Bradford",MO,Republican,2,1
+2298,"DAGUE, Paul Bartram",PA,Republican,9,1
+2383,"DAVIS, Glenn Robert",WI,Republican,2,4
+2389,"DAVIS, James Curran",GA,Democrat,5,1
+2430,"DAWSON, William Adams",UT,Republican,2,1
+2490,"DEMPSEY, John Joseph",NM,Democrat,0,4
+2588,"DIES, Martin, Jr.",TX,Democrat,0,6
+2616,"DIXON, Henry Aldous",UT,Republican,1,1
+2647,"DOLLIVER, James Isaac",IA,Republican,6,1
+2653,"DONDERO, George Anthony",MI,Republican,18,5
+2672,"DORN, William Jennings Bryan",SC,Democrat,3,5
+2700,"DOWDY, John Vernard",TX,Democrat,7,6
+2791,"DURHAM, Carl Thomas",NC,Democrat,6,1
+3171,"FISHER, Ovie Clark",TX,Democrat,21,5
+3197,"FJARE, Orvin Benonie",MT,Republican,2,5
+3242,"FLYNT, John James, Jr.",GA,Democrat,4,5
+3286,"FORRESTER, Elijah Lewis",GA,Democrat,3,2
+3321,"FOUNTAIN, Lawrence H.",NC,Democrat,2,3
+3510,"GAVIN, Leon Harry",PA,Republican,23,4
+3529,"GENTRY, Brady Preston",TX,Democrat,3,6
+3534,"GEORGE, Myron Virgil",KS,Republican,3,1
+3754,"GRANT, George McInvale",AL,Democrat,2,4
+3769,"GRAY, Kenneth James",IL,Democrat,25,5
+3853,"GROSS, Harold Royce",IA,Republican,3,7
+3888,"GWINN, Ralph Waldo",NY,Republican,27,4
+3929,"HALEY, James Andrew",FL,Democrat,7,4
+4031,"HAND, Thomas Millet",NJ,Republican,2,5
+4050,"HARDEN, Cecil Murray",IN,Republican,6,1
+4125,"HARRISON, Burr Powell",VA,Democrat,7,4
+4134,"HARRISON, Robert Dinsmore",NE,Republican,3,5
+4165,"HARVEY, Ralph",IN,Republican,10,3
+4311,"HENDERSON, John Earl",OH,Republican,15,5
+4354,"HERLONG, Albert Sydney, Jr.",FL,Democrat,5,4
+4373,"HESS, William Emil",OH,Republican,2,1
+4388,"HIESTAND, Edgar Willard",CA,Republican,21,4
+4429,"HILL, William Silas",CO,Republican,2,1
+4482,"HOEVEN, Charles Bernard",IA,Republican,8,5
+4487,"HOFFMAN, Clare Eugene",MI,Republican,4,7
+4493,"HOFFMAN, Richard William",IL,Republican,10,4
+4543,"HOLT, Joseph Franklin, III",CA,Republican,22,1
+4579,"HORAN, Walter Franklin (Walt)",WA,Republican,5,1
+4724,"HULL, William Raleigh, Jr.",MO,Democrat,6,2
+4846,"JACKSON, Donald Lester",CA,Republican,16,1
+4917,"JENKINS, Thomas Albert",OH,Republican,10,1
+4927,"JENNINGS, William Pat",VA,Democrat,9,4
+4928,"JENSEN, Benton Franklin",IA,Republican,7,5
+4935,"JOHANSEN, August Edgar",MI,Republican,3,5
+5019,"JONAS, Charles Raper",NC,Republican,10,4
+5071,"JONES, Woodrow Wilson",NC,Democrat,11,6
+5112,"KEARNS, Carroll Dudley",PA,Republican,24,1
+5235,"KILBURN, Clarence Evans",NY,Republican,33,1
+5241,"KILGORE, Joe Madison",TX,Democrat,15,4
+5267,"KING, Karl Clarence",PA,Republican,8,5
+5349,"KNOX, Victor Alfred",MI,Republican,11,5
+5410,"LAIRD, Melvin Robert",WI,Republican,7,5
+5436,"LANDRUM, Phillip Mitchell",GA,Democrat,9,5
+5694,"LIPSCOMB, Glenard Paul",CA,Republican,24,2
+5757,"LONG, George Shannon",LA,Democrat,8,4
+5803,"LOVRE, Harold Orrin",SD,Republican,1,4
+5885,"MACK, Russell Vernon",WA,Republican,3,4
+5998,"MARSHALL, Fred",MN,Democrat,6,2
+6061,"MASON, Noah Morgan",IL,Republican,15,7
+6204,"McCULLOCH, William Moore",OH,Republican,4,5
+6220,"McDONOUGH, Gordon Leo",CA,Republican,15,2
+6262,"McGREGOR, J. Harry",OH,Republican,17,6
+6276,"McINTIRE, Clifford Guy",ME,Republican,3,5
+6353,"McMILLAN, John Lanneau",SC,Democrat,6,4
+6389,"McVEY, William Estus",IL,Republican,4,5
+6474,"MILLER, Arthur Lewis",NE,Republican,4,5
+6481,"MILLER, Edward Tylor",MD,Republican,1,1
+6532,"MILLS, Wilbur Daigh",AR,Democrat,2,4
+6765,"MOULDER, Morgan Moore",MO,Democrat,11,4
+6795,"MUMMA, Walter Mann",PA,Republican,16,1
+6863,"NELSON, Charles Pembroke",ME,Republican,2,3
+6922,"NICHOLSON, Donald William",MA,Republican,9,6
+6958,"NORRELL, William Frank",AR,Democrat,6,3
+7044,"O'HARA, Joseph Patrick",MN,Republican,2,3
+7046,"O'KONSKI, Alvin Edward",WI,Republican,10,6
+7228,"PASSMAN, Otto Ernest",LA,Democrat,5,3
+7232,"PATMAN, John William Wright",TX,Democrat,1,1
+7415,"PHILLIPS, John",CA,Republican,29,5
+7498,"POAGE, William Robert",TX,Democrat,11,2
+7500,"POFF, Richard Harding",VA,Republican,6,1
+7506,"POLK, James Gould",OH,Democrat,6,2
+7777,"REECE, Brazilla Carroll",TN,Republican,1,4
+7779,"REED, Chauncey William",IL,Republican,14,3
+7781,"REED, Daniel Alden",NY,Republican,43,3
+7799,"REES, Edward Herbert",KS,Republican,4,3
+7845,"RHODES, John Jacob",AZ,Republican,1,1
+7925,"RIVERS, Lucius Mendel",SC,Democrat,1,1
+7969,"ROBESON, Edward John, Jr.",VA,Democrat,1,4
+8024,"ROGERS, Edith Nourse",MA,Republican,5,1
+8032,"ROGERS, Paul Grant",FL,Democrat,6,4
+8035,"ROGERS, Walter Edward",TX,Democrat,18,5
+8147,"RUTHERFORD, J. T.",TX,Democrat,16,5
+8247,"SAYLOR, John Phillips",PA,Republican,22,5
+8258,"SCHENCK, Paul Fornshell",OH,Republican,3,1
+8260,"SCHERER, Gordon Harry",OH,Republican,1,4
+8318,"SCRIVNER, Errett Power",KS,Republican,2,4
+8426,"SHEEHAN, Timothy Patrick",IL,Republican,11,5
+8484,"SHORT, Dewey Jackson",MO,Republican,7,5
+8495,"SHUFORD, George Adams",NC,Democrat,12,4
+8507,"SIKES, Robert Lee Fulton",FL,Democrat,3,5
+8508,"SILER, Eugene",KY,Republican,8,7
+8533,"SIMPSON, Sidney Elmer",IL,Republican,20,4
+8636,"SMITH, Howard Worth",VA,Democrat,8,5
+8663,"SMITH, Lawrence Henry",WI,Republican,1,6
+8709,"SMITH, Wint",KS,Republican,6,6
+9144,"TABER, John",NY,Republican,36,1
+9168,"TALLE, Henry Oscar",IA,Republican,2,5
+9203,"TAYLOR, Dean Park",NY,Republican,31,1
+9241,"TEAGUE, Olin Earl",TX,Democrat,6,3
+9284,"THOMAS, Albert",TX,Democrat,8,4
+9338,"THOMPSON, Ruth",MI,Republican,9,5
+9339,"THOMPSON, Theo Ashton",LA,Democrat,7,3
+9350,"THOMSON, Edwin Keith",WY,Republican,1,3
+9494,"TUCK, William Munford",VA,Democrat,5,5
+9578,"UTT, James Boyd",CA,Republican,28,6
+9627,"VAN PELT, William Kaiser",WI,Republican,6,5
+9645,"VAN ZANDT, James Edward",PA,Republican,20,2
+9657,"VELDE, Harold Himmel",IL,Republican,18,1
+9693,"VURSELL, Charles Wesley",IL,Republican,23,1
+9895,"WEAVER, Phillip Hart",NE,Republican,1,4
+9968,"WESTLAND, Alfred John (Jack)",WA,Republican,2,1
+9978,"WHARTON, James Ernest",NY,Republican,29,5
+10075,"WHITTEN, Jamie Lloyd",MS,Democrat,2,4
+10092,"WIER, Roy William",MN,Democrat,3,3
+10162,"WILLIAMS, John Bell",MS,Democrat,4,6
+10191,"WILLIAMS, William Robert",NY,Republican,34,4
+10201,"WILLIS, Edwin Edward",LA,Democrat,3,3
+10212,"WILSON, Earl",IN,Republican,9,2
+10279,"WINSTEAD, William Arthur",MS,Democrat,5,4
+10299,"WITHROW, Gardner Robert",WI,Republican,3,6
+10303,"WOLCOTT, Jesse Paine",MI,Republican,7,2
+10314,"WOLVERTON, Charles Anderson",NJ,Republican,1,1
+10437,"YOUNG, Clarence Clifton",NV,Republican,0,2
