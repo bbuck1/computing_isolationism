@@ -42,7 +42,7 @@ bb <- c(1, 5, 10, 15, 20)
 ll <- c("1", "5", "10", "15", "20+")
 
 key_votes %>%
-  filter(congress > 85) %>% 
+  filter(congress > 84) %>% 
   filter(party_code == "Democrat" |
            party_code ==  "Republican") %>% 
   filter(cohort == "int") %>% 
@@ -52,9 +52,9 @@ key_votes %>%
   facet_wrap(~type, labeller=labeller(type = label)) +
   geom_hline(yintercept = 0, linetype="dashed", color = "grey", size = 1) +
   geom_vline(xintercept = 0, linetype="dashed", color = "grey", size = 1) +
-  annotate("rect", xmin = 0, xmax = 1, ymin = 0, ymax = 1,
+  annotate("rect", xmin = 0.25, xmax = 1, ymin = 0, ymax = 0.75,
            alpha = .2) +
-  labs(title = "Foreign Policy Support, 79th through 84th Congress ",
+  labs(title = "Foreign Policy Support, 79th through 83rd Congress ",
        subtitle = "By U.S. House Representative, Party, and Bill Type ",
        color = "Party",
        x = "<- Liberal      Economic/Redistributive      Conservative->",
@@ -64,34 +64,36 @@ key_votes %>%
   scale_size_continuous(name = "Yay Votes",
                         breaks = bb,
                         labels = ll) +
-  theme_bw(base_size = 20) +
+  theme_bw(base_size = 25) +
   guides(color = guide_legend(override.aes = list(size=5))) #I increased the size so the text was larger when exported as a jpeg
 ```
 
 ```{r}
 
-bill_total<- key_votes_79_88_list %>% 
+bill_total<- key_votes_79_88_list %>%
+  filter(congress < 84) %>% 
   group_by(congress, type) %>% 
   summarize(number = n())
 
 
 key_votes %>%
   filter(party_code ==  "Republican") %>%
-  filter(congress < 85) %>% 
+  filter(congress < 84) %>% 
   group_by(cohort, congress, party_code, type) %>%
   summarize(vote = n()) %>% 
   left_join(bill_total, by = c("congress", "type")) %>% 
   mutate(avg = vote / number) %>% 
-  ggplot(aes(x= congress, y= avg, color = cohort)) + geom_point(size= 2) + geom_line(size= 0.5) +      facet_wrap(~type, labeller=labeller(type = label)) +
+  ggplot(aes(x= congress, y= avg, color = cohort)) + geom_point(size= 3) + geom_line(size= 1) +      facet_wrap(~type, labeller=labeller(type = label)) +
   labs(title = "Voting Patterns of Republican Representatives",
-       subtitle = "By Type and Vote",
+       subtitle = "By Type and Vote, 79th - 83rd Congress",
        color = "Vote Type",
-       shape = "Noninterventionist Votes",
        x = "Congress",
        y = "Average Vote Total Per Bill") +
   scale_color_manual(labels = c("Support", "Opposition", "Noncommitted"),
                      values = c("green", "red", "orange"))+
-  theme_bw() 
+  theme_bw() +
+   theme_bw(base_size = 25) +
+  guides(color = guide_legend(override.aes = list(size=2)))
 
 ```
 
@@ -114,7 +116,6 @@ key_votes %>%
   labs(title = "Voting Patterns by Democratic Representatives",
        subtitle = "By Type and Vote",
        color = "Vote Type",
-       shape = "Noninterventionist Votes",
        x = "Congress",
        y = "Average Vote Total Per Bill") +
   scale_color_manual(labels = c("Support", "Opposition", "Noncommitted"),
@@ -144,7 +145,7 @@ key_votes %>%
        y = "<- Liberal      Social Policy      Conservative->") +
   scale_color_manual(labels = c("Yay", "Nay", "No Vote"),
                      values = c("green", "red", "orange"))+
-  theme_bw() 
+  theme_bw(base_size = 25) 
 
 ```
 I intend to use this plot to show how Republican opposition to foreign aid grew as the LBJ administration  wore on.
@@ -167,7 +168,6 @@ key_votes %>%
   labs(title = "Foreign Aid Votes the House of Representatives",
        subtitle = "By Party and Vote Type",
        color = "Vote Type",
-       shape = "Noninterventionist Votes",
        x = "Congress",
        y = "Average Vote Total Per Bill") +
   scale_color_manual(labels = c("Support", "Opposition", "Noncommitted"),
@@ -184,18 +184,18 @@ key_votes %>%
   filter(congress == "87") %>% 
   filter(bill_no == "HR8400") %>% 
   ggplot(aes(x= nominate_dim1, y= nominate_dim2, color = cohort, shape = party_code)) + 
-  geom_point(size = 2, alpha = .7) +
+  geom_point(size = 5, alpha = .7) +
   geom_hline(yintercept = 0, linetype="dashed", color = "grey", size = 1) +
   geom_vline(xintercept = 0, linetype="dashed", color = "grey", size = 1) +
   labs(title = "House Vote on Foreign Assistance Act of 1961 (87 H.R. 8400)",
        subtitle = "By Party and Vote",
-       color = "Cohort",
+       color = "Vote",
        shape = "Party",
        x = "<- Liberal      Economic/Redistributive      Conservative->",
        y = "<- Liberal      Social Policy      Conservative->") +
   scale_color_manual(labels = c("Yay", "Nay", "No Vote"),
                      values = c("green", "red", "orange"))+
-  theme_bw() 
+  theme_bw(base_size = 25) 
 
 
 
