@@ -1,0 +1,402 @@
+---
+title: "First Look at Senate Data"
+author: "Brandan P Buck"
+date: "3/2/2020"
+output: html_document
+---
+
+```{r setup, include=TRUE}
+
+library(dplyr) 
+
+library(ggplot2)
+library(ggExtra)
+library(jpeg)
+library(knitr)
+library(pals)
+library(distill)
+library(grid)
+library(tidyverse)
+library(RColorBrewer)
+library(plotly)
+library(rmarkdown)
+
+
+key_votes<- read.csv("C:/Users/bpbuc/Documents/Brandan's Stuff/_PhD Stuff/Dissertation Research/new_digital_project/clean_data/key_votes_new.csv")
+
+key_votes_79_88_list<- read.csv("C:/Users/bpbuc/Documents/Brandan's Stuff/_PhD Stuff/Dissertation Research/new_digital_project/clean_data/key_votes_79_90_list_v2.csv")
+
+Hall_all_members<- read.csv("C:/Users/bpbuc/Documents/Brandan's Stuff/_PhD Stuff/Dissertation Research/new_digital_project/raw_data/HSall_members.csv")
+
+pal<- c("#33a532", "#cf142b", "#f7b500")
+label<- c(econ = "Foreign Aid", gov = "Foreign Policy", mil = "Military Policy and Appropriations", treaty = "Treaties")
+
+```
+
+## The Data
+
+
+
+## Plots I intend to use in the 811 paper
+
+
+
+```{r pressure, echo=TRUE, fig.height=8, fig.width= 12}
+
+sen_total_iso<- key_votes %>% 
+  filter(party_code == "Republican") %>% 
+  filter(chamber == "Senate") %>% 
+  filter(type != "mil") %>% 
+  filter(cohort == "iso") %>% 
+  group_by(bioname, cohort) %>% 
+  summarize(iso_num = n()) %>% 
+  select(bioname, iso_num)
+
+sen_total_int<- key_votes %>% 
+  filter(party_code == "Republican") %>% 
+  filter(chamber == "Senate") %>% 
+  filter(type != "mil") %>% 
+  filter(cohort == "int") %>% 
+  group_by(bioname, cohort) %>% 
+  summarize(int_num = n()) %>% 
+  select(bioname, int_num)
+
+sen_wing<- key_votes %>% 
+  filter(party_code == "Republican") %>% 
+  select(bioname, wing) %>% 
+  distinct(bioname, wing, nominate_dim1, nominate_dim2)
+
+session_num<- Hall_all_members %>% 
+  filter(party_code == "200") %>% 
+  filter(chamber == "Senate") %>% 
+  filter(congress > 78) %>% 
+  filter(congress < 91) %>%
+  select(bioname, congress) %>% 
+  group_by(bioname) %>% 
+  summarize(session_no = n())
+  
+gop_sen<- Hall_all_members %>% 
+  filter(party_code == "200") %>% 
+  filter(chamber == "Senate") %>% 
+  filter(congress > 78) %>% 
+  filter(congress < 91) %>%
+  select(icpsr, bioname, congress, nominate_dim1, nominate_dim2) %>% 
+  spread(congress, icpsr) %>% 
+  left_join(sen_total_iso, by = "bioname") %>% 
+  left_join(sen_total_int, by = "bioname") %>% 
+  drop_na(iso_num) %>% 
+  drop_na(int_num) %>% 
+  mutate(total_vote = iso_num + int_num) %>% 
+  mutate(iso_per = iso_num / total_vote) %>% 
+  left_join(sen_wing, by = "bioname") %>% 
+  left_join(session_num, by = "bioname") %>% 
+  arrange(desc(session_no))
+
+gop_sen_1<- gop_sen %>% 
+  select(bioname, iso_per, total_vote, session_no, wing)
+
+paged_table(gop_sen_1)
+         
+```
+
+
+```{r}
+
+hou_total_iso<- key_votes %>% 
+  filter(party_code == "Republican") %>% 
+  filter(chamber == "House") %>% 
+  filter(type != "mil") %>% 
+  filter(cohort == "iso") %>% 
+  group_by(bioname, cohort) %>% 
+  summarize(iso_num = n()) %>% 
+  select(bioname, iso_num)
+
+hou_total_int<- key_votes %>% 
+  filter(party_code == "Republican") %>% 
+  filter(chamber == "House") %>% 
+  filter(type != "mil") %>% 
+  filter(cohort == "int") %>% 
+  group_by(bioname, cohort) %>% 
+  summarize(int_num = n()) %>% 
+  select(bioname, int_num)
+
+hou_wing<- key_votes %>% 
+  filter(party_code == "Republican") %>% 
+  select(bioname, wing, nominate_dim1, nominate_dim2) %>% 
+  distinct(bioname, wing, nominate_dim1, nominate_dim2)
+
+session_num<- Hall_all_members %>% 
+  filter(party_code == "200") %>% 
+  filter(chamber == "House") %>% 
+  filter(congress > 78) %>% 
+  filter(congress < 91) %>%
+  select(bioname, congress) %>% 
+  group_by(bioname) %>% 
+  summarize(session_no = n())
+
+gop_hou<- Hall_all_members %>% 
+  filter(party_code == "200") %>% 
+  filter(chamber == "House") %>% 
+  filter(congress > 78) %>% 
+  filter(congress < 91) %>%
+  select(icpsr, bioname, congress, nominate_dim1, nominate_dim2) %>% 
+  spread(congress, icpsr) %>% 
+  left_join(hou_total_iso, by = "bioname") %>% 
+  left_join(hou_total_int, by = "bioname") %>% 
+  drop_na(iso_num) %>% 
+  drop_na(int_num) %>% 
+  mutate(total_vote = iso_num + int_num) %>% 
+  mutate(iso_per = iso_num / total_vote) %>% 
+  left_join(sen_wing, by = "bioname") %>% 
+  left_join(session_num, by = "bioname") %>% 
+  arrange(desc(session_no))
+
+gop_hou_1<- gop_hou %>% 
+  select(bioname, iso_per, total_vote,session_no, wing)
+
+paged_table(gop_hou_1)
+
+```
+```{r}
+
+gop_sen %>% 
+  group_by(wing) %>% 
+  summarize(mean(iso_per))
+
+gop_hou %>% 
+  group_by(wing) %>% 
+  summarize(mean(iso_per))
+
+```
+
+
+```{r, fig.height=8, fig.width= 15}
+
+key_votes %>% 
+  filter(party_code == "Republican") %>% 
+  filter(congress == "85") %>% 
+  filter(rollnumber == "10" |
+         rollnumber == "3") %>%
+  ggplot(aes(x= nominate_dim1, y= nominate_dim2, color = cohort)) + 
+  facet_wrap(~chamber) +
+  geom_hline(yintercept = 0, linetype="dashed", color = "grey", size = 1) +
+  geom_vline(xintercept = 0, linetype="dashed", color = "grey", size = 1) +
+  geom_point(size = 4, alpha = .7) +
+  labs(title = "Combined Vote on the Eisenhower Doctrine (85 H.J.Res. 117)",
+       subtitle = "By Party and Vote",
+       color = "Vote",
+       shape = "Chamber",
+       x = " Liberal      Economic/Redistributive      Conservative",
+       y = " Liberal      Social Policy      Conservative") +
+  scale_color_manual(labels = c("Yay", "Nay", "No Vote"),
+                     values = pal)+
+  xlim(-0.25,1) + ylim(-1, 1) +
+  theme_bw(base_size = 12) +
+  theme(legend.position="bottom", legend.box = "horizontal",
+        legend.title = element_text(size=15, color = "Black", face="bold")) +
+  guides(color = guide_legend(override.aes = list(size=7)),
+         shape = guide_legend(override.aes = list(size=7)))
+```
+
+
+```{r, fig.height=8, fig.width= 12}
+
+bill_total<- key_votes_79_88_list %>%
+  group_by(congress, type, chamber) %>%
+  filter(chamber == "Senate") %>% 
+  summarize(number = n())
+
+pal<- c("#33a532", "#cf142b", "#f7b500")
+label<- c(econ = "Foreign Aid", gov = "Foreign Policy", mil = "Military Policy and Appropriations", treaty = "Treaties")
+
+key_votes %>%
+  filter(party_code == "Republican") %>% 
+  filter(chamber == "Senate") %>% 
+  group_by(cohort, congress, type) %>%
+  summarize(vote = n()) %>% 
+  left_join(bill_total, by = c("congress", "type")) %>% 
+  mutate(avg = vote / number) %>% 
+  ggplot(aes(x= congress, y= avg, color = cohort)) + geom_point(size= 3) + geom_line(size= 1) +      
+  facet_wrap(~type, labeller=labeller(type = label)) +
+  labs(title = "Voting Patterns of Republican Senators on Cold War Policy",
+       subtitle = "U.S. Senate, 79th to 83rd Congresses, by Type and Vote",
+       color = "Cohort",
+       x = "Congress",
+       y = "Average Vote Total Per Bill") +
+  scale_color_manual(values = pal,
+                     labels = c("Support", "Opposition", "Noncommitted")) +
+  theme_bw(base_size = 12) +
+  theme(legend.position="bottom", legend.box = "horizontal",
+        legend.title = element_text(size=15, color = "Black", face="bold")) +
+  guides(color = guide_legend(override.aes = list(size=1.5)))
+
+```
+
+```{r, fig.height=8, fig.width= 12}
+label<- c(econ = "Foreign Aid", gov = "Foreign Policy", mil = "Military Policy and Appropriations", treaty = "Treaties")
+
+key_votes %>%
+  filter(chamber == "Senate") %>% 
+  filter(wing == "Right") %>% 
+  filter(party_code == "Republican") %>% 
+  group_by(cohort, congress, type) %>%
+  summarize(vote = n()) %>% 
+  left_join(bill_total, by = c("congress", "type")) %>% 
+  mutate(avg = vote / number) %>% 
+  ggplot(aes(x= congress, y= avg, color = cohort)) + geom_point(size= 3) + geom_line(size= 1) +      
+  facet_wrap(~type, labeller=labeller(type = label)) +
+  labs(title = "Voting Patterns of Right-Wing Senate Republicans",
+       subtitle = "79th to 83rd Congresses, by Type and Vote",
+       color = "Vote Type",
+       x = "Congress",
+       y = "Average Vote Total Per Bill") +
+  scale_color_manual(values = pal,
+                     labels = c("Support", "Opposition", "Noncommitted")) +
+  theme_bw(base_size = 12) +
+  theme(legend.position="bottom", legend.box = "horizontal",
+        legend.title = element_text(size=15, color = "Black", face="bold")) +
+  guides(color = guide_legend(override.aes = list(size=1.5)))
+
+
+```
+
+```{r, fig.height=8, fig.width= 12}
+
+key_votes %>%
+  filter(chamber == "House") %>% 
+  filter(wing == "Right") %>% 
+  filter(party_code == "Republican") %>% 
+  group_by(cohort, congress, type) %>%
+  summarize(vote = n()) %>% 
+  left_join(bill_total, by = c("congress", "type")) %>% 
+  mutate(avg = vote / number) %>% 
+  ggplot(aes(x= congress, y= avg, color = cohort)) + geom_point(size= 3) + geom_line(size= 1) +      
+  facet_wrap(~type, labeller=labeller(type = label)) +
+  labs(title = "Voting Patterns of Right-Wing House Republicans",
+       subtitle = "79th to 83rd Congresses, by Type and Vote",
+       color = "Vote Type",
+       x = "Congress",
+       y = "Average Vote Total Per Bill") +
+  scale_color_manual(values = pal,
+                     labels = c("Support", "Opposition", "Noncommitted")) +
+  theme_bw(base_size = 12) +
+  theme(legend.position="bottom", legend.box = "horizontal",
+        legend.title = element_text(size=15, color = "Black", face="bold")) +
+  guides(color = guide_legend(override.aes = list(size=1.5)))
+
+
+```
+
+
+```{r, fig.height=8, fig.width= 12}
+econ_year<- key_votes_79_88_list %>% 
+  filter(chamber == "Senate") %>% 
+  group_by(congress, type) %>% 
+  filter(type == "econ") %>% 
+  summarize(number = n())
+
+key_votes %>%
+  filter(party_code ==  "Republican") %>%
+  filter(chamber == "Senate") %>% 
+  filter(type == "econ") %>% 
+  group_by(cohort, congress, wing) %>%
+  summarize(vote = n()) %>% 
+  left_join(econ_year, by = "congress") %>% 
+  mutate(avg = vote / number) %>% 
+  ggplot(aes(x= congress, y= avg, color = cohort)) + geom_point(size= 3) + geom_line(size= 1) +
+  facet_wrap(~wing) +
+  labs(title = "Senate Republican Intraparty Voting Trends on Foreign Aid",
+       subtitle = "79th to 90th Congresses by Party and Vote",
+       color = "Cohort",
+       x = "Congress",
+       y = "Average Vote Total Per Bill") +
+  scale_color_manual(labels = c("Support", "Opposition", "Noncommitted"),
+                     values = pal)+
+    theme_bw(base_size = 12) +
+  theme(legend.position="bottom", legend.box = "horizontal",
+        legend.title = element_text(size=15, color = "Black", face="bold")) +
+  guides(color = guide_legend(override.aes = list(size=1.5)))
+
+```
+
+
+```{r,fig.height=8, fig.width= 12}
+
+gop_num<- key_votes %>% 
+  filter(party_code == "Republican") %>% 
+  distinct(bioname, congress, chamber) %>% 
+  group_by(congress, chamber) %>% 
+  summarize(total = n())
+
+key_votes %>% 
+  filter(party_code == "Republican") %>% 
+  distinct(bioname, congress, wing, chamber) %>% 
+  group_by(congress, wing, chamber) %>% 
+  summarize(num = n()) %>% 
+  left_join(gop_num, by = c("congress", "chamber")) %>% 
+  mutate(percent = num / total) %>% 
+  ggplot(aes(x= congress, y= percent, color = wing)) + geom_point(size= 3) + geom_line(size= 1) +
+  facet_wrap(~chamber) +
+  labs(title = "Senate Republican Ideological Cohorts",
+       subtitle = "Percentages of 79th to 90th Congresses",
+       color = "Wing",
+       x = "Congress",
+       y = "Percentage of Entire GOP Body") +
+   theme_bw(base_size = 12) +
+  theme(legend.position="bottom", legend.box = "horizontal",
+        legend.title = element_text(size=15, color = "Black", face="bold")) +
+  guides(color = guide_legend(override.aes = list(size=1.5)))
+
+```
+
+```{r, fig.height=8, fig.width= 12}
+  
+bb <- c(0.1, 0.2, 0.4, 0.6, 0.8)
+ll <- c("10%", "20%", "40%", "60%", "80%")
+
+gop_sen %>% 
+  ggplot(aes(x= nominate_dim1, y= nominate_dim2, size= session_no, 
+         color = iso_per, label = bioname)) + geom_point(alpha = 0.7) +
+  geom_hline(yintercept = 0, linetype="dashed", color = "grey", size = 1) +
+  geom_vline(xintercept = 0, linetype="dashed", color = "grey", size = 1) +
+    labs(title = "Senate Republican Noninterventionist Voting Patterns",
+       subtitle = "79th to 90th Congresses",
+       size = "Sessions Served",
+       x = " Liberal      Economic/Redistributive      Conservative ",
+       y = " Liberal      Social Policy      Conservative ") +
+  theme_bw(base_size = 12) +
+  scale_color_continuous(name = "Noninterventionist Voting Percentage",
+                        breaks = bb,
+                        labels = ll,
+                        low = "blue",
+                        high = "red") +
+  theme(legend.position="bottom", legend.box = "horizontal",
+        legend.title = element_text(size=15, color = "Black", face="bold")) +
+  guides(color = guide_legend(override.aes = list(size=6)))
+
+```
+
+```{r, fig.height=8, fig.width= 12}
+
+gop_hou %>% 
+  ggplot(aes(x= nominate_dim1, y= nominate_dim2, size= session_no, 
+             color = iso_per, label = bioname)) + geom_point(alpha = 0.7) +
+  geom_hline(yintercept = 0, linetype="dashed", color = "grey", size = 1) +
+  geom_vline(xintercept = 0, linetype="dashed", color = "grey", size = 1) +
+      labs(title = "House Republican Noninterventionist Voting Patterns",
+       subtitle = "79th to 90th Congresses",
+       size = "Sessions Served",
+       x = " Liberal      Economic/Redistributive      Conservative ",
+       y = " Liberal      Social Policy      Conservative ") +
+  theme_bw(base_size = 12) +
+  scale_color_continuous(name = "Noninterventionist Voting Percentage",
+                        breaks = bb,
+                        labels = ll,
+                        low = "blue",
+                        high = "red") +
+  theme(legend.position="bottom", legend.box = "horizontal",
+        legend.title = element_text(size=15, color = "Black", face="bold")) +
+  guides(color = guide_legend(override.aes = list(size=6)))
+
+```
+
