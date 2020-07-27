@@ -1,0 +1,1061 @@
+---
+title: "Congress's Cold War and the Transformation of the American Right"
+description: |
+  A Macro and Micro Analysis of Congressional Voting on Cold War Policy.
+author:
+  - name: Brandan P. Buck 
+    url: https://brandanpbuck.com
+    affiliation: George Mason University
+    affiliation_url: https://historyarthistory.gmu.edu/
+date: "`r Sys.Date()`"
+output: distill::distill_article
+---
+
+```{r setup, include=FALSE}
+
+library(dplyr) 
+library(ggplot2)
+library(ggExtra)
+library(jpeg)
+library(knitr)
+library(pals)
+library(scales)
+library(distill)
+library(grid)
+library(tidyverse)
+library(RColorBrewer)
+library(plotly)
+library(rmarkdown)
+library(gridExtra)
+library(grid)
+
+key_votes<- read.csv("C:/Users/bpbuc/Documents/Brandan's Stuff/_PhD Stuff/Dissertation Research/new_digital_project/clean_data/key_votes.csv")
+
+key_votes_79_90_list<- read.csv("C:/Users/bpbuc/Documents/Brandan's Stuff/_PhD Stuff/Dissertation Research/new_digital_project/raw_data/rollcalls/rollcall_votes_79_101.csv")
+
+Hall_all_members<- read.csv("C:/Users/bpbuc/Documents/Brandan's Stuff/_PhD Stuff/Dissertation Research/new_digital_project/raw_data/HSall_members.csv")
+
+regions<-read.csv("C:/Users/bpbuc/Documents/Brandan's Stuff/_PhD Stuff/Dissertation Research/new_digital_project/clean_data/region.csv")
+
+leaderboard<-read.csv("C:/Users/bpbuc/Documents/Brandan's Stuff/_PhD Stuff/Dissertation Research/new_digital_project/clean_data/leaderboard.csv")
+
+
+```
+
+Since my previous notebook I completed my collection of rollcall votes through the entirety of the Cold War, the 79th Congress (1945-1947) through the 101st (1989-1991). The rollcall dataset is comprised of 3,291 records. When combined with Voteview’s voting and members databases it yields a corpus of 844,314 observations.
+
+The chief takeaway from this notebook is that the decline of noninterventionism within the Republican party, and among the American right more generally, was a long and beleaguered process. Contrary to the views of scholars of the early Cold War and American conservatism, the ideas of the “Old Isolationists” were not decisively defeated by a select group of legislative and executive battles.  Rather were subjected to decades long culling from the Republican Party. Noninterventionism was vanquished not by a war of maneuver but one of attrition. Historians who have researched the early national security state tend end their treatments to either the first or second terms of the Eisenhower administration. The conventional thinking from scholars such as Justus Doenecke, Michael Hogan, Aaron Friedberg, Colin Dueck, and recently, C. William Walldorf  is that the Eisenhower administration was able to plot a center course with his New Look defense policy which placated their concerns and thereby undercut their resistance. 
+But this thesis only holds if one ends the story during the midpoint of the Eisenhower administration and confine one’s analysis to defense spending a small collection of well-known legislation. As I argued in my 811 paper, as I will show in this piece when looking at the full range of U.S. Cold War policy, rightwing resistance to the status quo remained firm for at least a decade after this conventional narrative…and vestiges remained into the mid-1970s.
+
+Why does this distinction matter? A longer collapse of rightwing noninterventionism suggests that the advent of interventionism and the embrace of an American led international order was not an inevitable response to the material conditions of world destroyed by World War II, but rather a conscience political process. This approach also puts the political process back into the story of the Cold War. All too often the Cold War Consensus, the narrative engine of the U.S. government’s foreign policy actions from 1945 until 1991 are thought of as simultaneously apolitical and bipartisan. Applying a quantitative approach to Congressional voting records reveals that the Consensus was thoroughly political and existed in its early years despite significant trepidations from the American right.
+
+To demonstrate this thesis, this notebook will use computational methods on the corpus mentioned above to track the decline of rightwing noninterventionism within the parties, chambers, wings, and within individuals. I will also use the data to test several hypotheses as to why Republican noninterventionism declined during the Cold War. While this notebook is primarily concerned with the Republican Party and its rightwing, it will also touch on the ideological composition and transformation of the Democratic Party throughout the Cold War. 
+
+<h2> Methodology </h2>
+
+As with earlier iterations of this project I coded each rollcall as one of three categories, foreign aid, diplomatic policy, or military, and as either a normal or “reverse vote.” With each rollcall I determined the vote’s “directionality.” For normal votes, this meant that a “yay” in favor of the measure on the floor meant support for the Cold War policy in question. Reverse votes were instances of legislative obstructionism. These rollcalls were meant to derail, limit, or otherwise impede the proposed legislation or declaration. Examples include efforts to recommit legislation to committee, efforts to amend bills with limiting language, cut funds, limit geographic scope, establish limits on time, restrict executive authority and so on. Reverse votes were coded to represent nay votes on these roll calls in the same direction as normal votes. 
+
+To evaluate changing attitudes on U.S. foreign policy I generated percentages of opposition to rollcall votes for parties, wings, chambers, and individuals. Statistics were generated per congress, series of congresses or the course of an individual career. To generate these statistics, I divided the number of “isolationist” votes (per individual or political body) by the total of all “nays” and “yays.” I excluded abstentions and votes of “present” from these detailed analyses due to their noncommitted nature. They are however included in graphics which depict party or chamber level trends. 
+
+Examples of my methods are well displayed by the voting careers of Sen. Hiram Johnson (R, CA) and Rep. Herman Toll (D, PA). Sen. Johnson served during one Cold War congress (the 79th, 1945-1947), he cast two abstentions, two nays, and six yays on “reverse votes,” therefore his career opposition score is 100%. Conversely, Rep. Toll served during four congresses (86th-89th 1959-1967), cast 84 yays (affirmative support for Cold War policies), 21 nays on reverse votes (efforts to defeat obstruction on the part of noninterventionists) with 45 abstentions. Therefore, Toll’s opposition score is 0%. For members who served in multiple parties and/or in both chambers I generated statics on their entire legislative history, irrespective of their party affiliation or chamber in any given congress. Examples are displayed below.
+
+```{r, layout="l-page"}
+
+example<- leaderboard %>% 
+  filter(icpsr == 9408 |
+         icpsr == 3853|
+         icpsr == 4962 |
+         icpsr == 1218 |
+         icpsr == 8764 |
+         icpsr == 9604 |
+         icpsr == 99369 |
+         icpsr == 9369 |
+         icpsr == 14101) %>% 
+  select(bioname, chamber, party_code, state_abbrev, congress_num, total_vote, iso_num, oppo_per)
+
+paged_table(example)
+
+```
+
+This process was also applied to congresses, parties, chambers, and wings depending upon the historical questions asked and graphics produced.
+
+```{r, layout="l-page"}
+
+total_iso<- key_votes %>% 
+  filter(congress > 78) %>% 
+  filter(party_code != "Independent") %>% 
+  filter(cast_code == "iso") %>% 
+  group_by(icpsr, chamber, party_code) %>% 
+  summarize(iso_num = n()) %>% 
+  select(icpsr, iso_num, chamber, party_code)
+
+total_vote<- key_votes %>% 
+  filter(congress > 78) %>% 
+  filter(party_code != "Independent") %>% 
+  filter(cast_code != "nv") %>% 
+  group_by(icpsr, chamber, party_code, wing, nominate_dim1, nominate_dim2) %>% 
+  summarize(total_vote = n()) %>% 
+  select(icpsr, total_vote, chamber,wing,  party_code, nominate_dim1, nominate_dim2)
+
+example_2<- Hall_all_members %>%
+  filter(party_code != "Independent") %>% 
+  filter(wing != "UNK") %>% 
+  filter(chamber != "President") %>% 
+  filter(congress > 78) %>% 
+  filter(congress < 102) %>% 
+  select(icpsr, chamber, party_code, congress) %>% 
+  left_join(total_iso, by = c ("icpsr", "chamber", "party_code")) %>% 
+  left_join(total_vote, by = c ("icpsr", "chamber", "party_code")) %>% 
+  mutate(oppo_per = iso_num / total_vote) %>% 
+  mutate(id_score = nominate_dim1 + nominate_dim2) %>% 
+  drop_na(oppo_per) %>% 
+  group_by(congress, party_code, wing, chamber) %>% 
+  summarize(cong_oppo = median(oppo_per))
+
+paged_table(example_2)
+
+```
+
+Much of this notebook’s findings rest on defining the political spectrum. Voteview’s dataset contains ideological scores which locate congressional representatives and senators on the quadrant political compass. While these scores are useful, I needed some more generalized characterizations to measure trends within the parties. To do so I created the categories, “left,” “right,” and “center.” I know that these categories are fraught with their own issues. Particularly the Democratic Party, which spent the Cold War period dispersed significantly along the y/social policy axis. However, considering that the intraparty struggles over foreign policy were animated by such categories I think that they ought to be considered. I created slightly more expansive categories for left and right in this notebook than for my previous. I did so because I believed them to be a more accurate representation of the popular understanding of these groups and because they aligned with the broader intraparty changes on foreign policy. A political map depicting these characterizations is below.
+
+Finally, I intended this notebook as a continuation of my previous notebooks and my 811 paper. As such I glossed over defining terms such as “Old Isolationist,” “Old Right,” “New Right,” and so on.
+
+
+```{r, layout="l-page"}
+
+pal<- c("#8e44ad", "#239b56", "#f39c12")
+
+Hall_all_members %>% 
+  filter(wing != "UNK") %>% 
+  filter(congress > 78) %>% 
+  filter(congress < 102) %>% 
+  ggplot(aes(x= nominate_dim1, nominate_dim2, shape = party_code, color = wing)) + geom_point() +
+  labs(title = "Defining the Political Spectrum",
+       color = "Wing",
+       shape = "Party",
+       x = "<- Liberal      Economic/Redistributive      Conservative ->",
+       y = "<- Liberal      Social Policy      Conservative ->") +
+  scale_color_manual(values = pal,
+                     labels = c("Center", "Left", "Right")) +
+  theme_bw(base_size = 8) +
+  theme(legend.position="bottom", legend.box = "horizontal",
+        legend.title = element_text(size=8, color = "Black", face="bold")) +
+  guides(color = guide_legend(override.aes = list(size=1)),
+         shape = guide_legend(override.aes = list(size=1)))
+         
+```
+
+<h2>The Big Picture </h2>
+
+At a macro level it would be fair to say that the ideological trajectories of the two major parties are as follows: the Republicans became significantly more interventionist over the course of Cold War, conversely, the Democrats went from the Cold War’s biggest booters to its biggest detractors. The GOP’s gulf between support and opposition shrank significantly in one or both chambers during the 81st and 88th Congresses. This does not of course provide the context of those periods. The 81st Congress was arguable the highwater mark of isolationism during the Cold War. The Old Right offered significant resistance on substantive Cold War initiatives, including aid to South Korea, joining NATO, etc. The resurgence of opposition in the 88th congress is a little misleading. As covered in my 811 paper, Republican opposition during the period was the foreign policy equivalent of a tax revolt. While members of the GOP voted in significant numbers against foreign aid programs, they did so on largely fiscal, not necessarily moral grounds. Many members supported reverse votes while also voting in favor of the programs after amendment. This is a potential downside of including reverse votes in my analysis. However, their exclusion would mean losing a mechanism of dissent. Similarly, on some pieces of legislation no passage rollcall was held and instead passed via voice vote. In these cases, reverse votes are the only records which remain regarding these pivotal pieces of legislation.
+
+A similar outcome can be observed with the Democratic Party. During the 98th and 99th congresses Democratic opposition outpaced support. This crossover is largely due to efforts to limit defense spending requested by the Reagan administration and efforts to scuttle conservative efforts to intervene in Latin America and Sub-Saharan Africa. Like their Republican colleagues a decade and a half earlier, most of the Democrats who favored the cuts ultimately voted in favor of the final spending bills.
+
+
+```{r, layout="l-page"}
+
+pal<- c("#33a532", "#cf142b", "#f7b500")
+
+vote_total<- key_votes %>% 
+  filter(party_code != "Independent") %>% 
+  group_by(congress, party_code) %>% 
+  summarize(vote_total = n())
+
+key_votes %>%
+  filter(wing != "UNK") %>% 
+  filter(party_code != "Independent") %>% 
+  group_by(cast_code, congress, party_code) %>% 
+  summarize(no = n()) %>% 
+  left_join(vote_total, by = c("congress", "party_code")) %>% 
+  mutate(cong_per = no / vote_total) %>% 
+  ggplot(aes(x= congress, y= cong_per, color = cast_code)) + geom_point(size= 1.5) + 
+  geom_line(size= .75) + facet_grid(~party_code) +   
+labs(title = "Voting Patterns of U.S. Congress on Cold War Policy",
+       subtitle = "By Party, 79th to 101st Congresses",
+       color = "Cohort",
+       x = "Congress",
+       y = "Average Vote Percentage Per Congress") +
+  scale_color_manual(values = pal,
+                     labels = c("Support", "Opposition", "Noncommitted")) +
+  theme_bw(base_size = 8) +
+  theme(legend.position="bottom", legend.box = "horizontal",
+        legend.title = element_text(size=8, color = "Black", face="bold")) +
+  guides(color = guide_legend(override.aes = list(size=1))) +
+  scale_y_continuous(breaks=c(0, 0.15, .3, .45, .6, .75, .9),
+                     labels=c("0%","15%", "30%", "45%", "60%", "75%", "90%")) +
+  scale_x_continuous(breaks = c(80, 85, 90, 95, 100),
+                     labels = c("80th", "85th", "90th", "95th", "100th")) 
+
+```
+
+If we observe the entirety of the Cold War without the reverse then the periods of congressional unrest appear less dramatic, with the 81st Congress visa vie the Republican House and the Reagan Era with the Democratic Party as notable exceptions. Also, of note is the similarity between the parties by the end of the Cold War. The 101st Congress (1989-1991) was a transitionary period for the United States government. The Berlin Wall fell, and the Soviet Union was clearly on the decline. Key issues of this period often did not revolve around the U.S. relationship or competition with the U.S.S.R. Examples include the U.S. invasion of Panama (1989-1990), deepening multilateral ties with Egypt and Israel, and initiation of Operation Desert Shield. 
+
+```{r, layout="l-page"}
+
+pal<- c("#33a532", "#cf142b", "#f7b500")
+
+vote_total<- key_votes %>% 
+  filter(reverse_vote == "N") %>% 
+  filter(party_code != "Independent") %>% 
+  group_by(congress, party_code) %>% 
+  summarize(vote_total = n())
+
+key_votes %>%
+  filter(reverse_vote == "N") %>% 
+  filter(wing != "UNK") %>% 
+  filter(party_code != "Independent") %>% 
+  group_by(cast_code, congress, party_code) %>% 
+  summarize(no = n()) %>% 
+  left_join(vote_total, by = c("congress", "party_code")) %>% 
+  mutate(cong_per = no / vote_total) %>% 
+  ggplot(aes(x= congress, y= cong_per, color = cast_code)) + geom_point(size= 1.5) + 
+  geom_line(size= .75) + facet_grid(~party_code) +   
+  labs(title = "Voting Patterns of U.S. Congress on Cold War Policy",
+       subtitle = "Without Reverse Votes, By Party, 79th to 101st Congresses",
+       color = "Cohort",
+       x = "Congress",
+       y = "Average Vote Percentage Per Congress") +
+  scale_color_manual(values = pal,
+                     labels = c("Support", "Opposition", "Noncommitted")) +
+  theme_bw(base_size = 8) +
+  theme(legend.position="bottom", legend.box = "horizontal",
+        legend.title = element_text(size=8, color = "Black", face="bold")) +
+  guides(color = guide_legend(override.aes = list(size=1))) +
+  scale_y_continuous(breaks=c(0, 0.15, .3, .45, .6, .75, .9),
+                     labels=c("0%","15%", "30%", "45%", "60%", "75%", "90%")) +
+  scale_x_continuous(breaks = c(80, 85, 90, 95, 100),
+                     labels = c("80th", "85th", "90th", "95th", "100th")) 
+
+
+```
+
+
+If we observe the entirety of the Cold War without the reverse then the periods of congressional unrest appear less dramatic, with the 81st Congress visa vie the Republican House and the Reagan Era with the Democratic Party as notable exceptions. Also, of note is the similarity between the parties by the end of the Cold War. The 101st Congress (1989-1991) was a transitionary period for the United States government. The Berlin Wall fell, and the Soviet Union was clearly on the decline. Key issues of this period often did not revolve around the U.S. relationship or competition with the U.S.S.R. Examples include the U.S. invasion of Panama (1989-1990), deepening multilateral ties with Egypt and Israel, and initiation of Operation Desert Shield. 
+
+<aside>
+<b> Republican and Democratic Voting in the 79th Congress, <br> (1945-1947), <br> Without Reverse Votes: </b> </b>
+<table style="width:100%">
+  <tr>
+    <th></th>
+    <th>Republican</th> 
+    <th>Democrat</th> 
+  </tr>
+  <tr>
+    <td>Support</td>
+    <td>61%</td>
+    <td>74%</td>
+  </tr>
+  <tr>
+    <td>Opposition</td>
+    <td>24%</td>
+    <td>5%</td>
+  </tr>
+    <tr>
+    <td>Noncommitted</td>
+    <td>15%</td>
+    <td>21%</td>
+  </tr>
+  </tr>
+</table>
+</aside>
+
+These initiatives enjoyed significant bilateral support and closed the gap between the parties which waxed and waned throughout the Cold War. With U.S. hegemony on the horizon and the gulf between the Democrats and Republicans closed, a new hegemonic consensus came into focus. The divide between the parties was the smallest it had been in over three decades. 
+
+
+These trends are indicative of a live debate on the course of the Cold War, one which essentially saw the parties switch places as the hardline supporter of the U.S. government’s struggle against communism and international affairs more broadly. Opposition within the Republican party trended steadily downward after the 87th congress (1961-1963) and reached its nadir during the 101st Congress (1989-1991), on the eve of the Soviet Union’s collapse during the George H.W. Bush administration. With the departure of Ronald Reagan, the Democrats began to tack towards interventionism once more. By the end of the Cold War their opposition would wane the parties would reach a virtual parity, something not seen since the relative calm of the 86th congress (1959-1961).
+
+<aside>
+<b> Republican and Democratic Voting in the 101st Congress, <br> (1989-1991), <br> Without Reverse Votes: </b> </b>
+<table style="width:100%">
+  <tr>
+    <th></th>
+    <th>Republican</th> 
+    <th>Democrat</th> 
+  </tr>
+  <tr>
+    <td>Support</td>
+    <td>78%</td>
+    <td>74%</td>
+  </tr>
+  <tr>
+    <td>Opposition</td>
+    <td>19%</td>
+    <td>23%</td>
+  </tr>
+    <tr>
+    <td>Noncommitted</td>
+    <td>3%</td>
+    <td>3%</td>
+  </tr>
+  </tr>
+</table>
+</aside>
+
+```{r, layout="l-page", echo= FALSE}
+
+vote_total<- key_votes %>% 
+  filter(reverse_vote == "N") %>% 
+  filter(party_code != "Independent") %>% 
+  group_by(congress, party_code) %>% 
+  summarize(vote_total = n())
+
+party_difference_dem<- key_votes %>%
+  filter(reverse_vote == "N") %>% 
+  filter(wing != "UNK") %>% 
+  filter(party_code != "Independent") %>% 
+  group_by(cast_code, congress, party_code) %>% 
+  summarize(no = n()) %>% 
+  left_join(vote_total, by = c("congress", "party_code")) %>% 
+  mutate(cong_per = no / vote_total) %>% 
+  filter(cast_code == "int") %>% 
+  filter(party_code == "Democrat")
+
+party_difference_gop<- key_votes %>%
+  filter(reverse_vote == "N") %>% 
+  filter(wing != "UNK") %>% 
+  filter(party_code != "Independent") %>% 
+  group_by(cast_code, congress, party_code) %>% 
+  summarize(no = n()) %>% 
+  left_join(vote_total, by = c("congress", "party_code")) %>% 
+  mutate(cong_per = no / vote_total) %>% 
+  filter(cast_code == "int") %>% 
+  filter(party_code == "Republican")
+
+party_difference_dem %>% 
+  left_join(party_difference_gop, by = "congress") %>% 
+  mutate(diff = cong_per.x - cong_per.y) %>% 
+  ggplot(aes(x= congress, y = diff)) + geom_line(size = 1) +   geom_point(size = 3) +
+  theme_bw(base_size = 8) +
+  labs(title = "Oppositional Patterns of U.S. Congress on Cold War Policy",
+       subtitle = "Without Reverse Votes, By Party, 79th to 101st Congresses",
+       x = "Congress",
+       y = "Difference Between Parties") +
+  annotate("rect", xmin = 79, xmax = 101, ymin = -.2, ymax = 0,
+           alpha = .1, fill = "blue") +
+  annotate("rect", xmin = 79, xmax = 101, ymin = 0, ymax = 0.3,
+           alpha = .1, fill = "red") +
+  scale_x_continuous(breaks = c(80, 85, 90, 95, 100),
+                     labels = c("80th", "85th", "90th", "95th", "100th")) +
+  scale_y_continuous(breaks = c(.3, .25, .2, .15,.1, .05, 0, -0.05, -0.1, -0.15, -0.2),
+                     labels = c("GOP, +30%", "GOP, +25%", "GOP,+20%","GOP, +15%", 
+                                "GOP, +10%", "GOP, +5%", "Parity","Dems, +5%", "Dems, +10%", 
+                                "Dems, +15%", "Dems, +20%")) +
+  geom_hline(yintercept = 0, linetype="dashed", color = "grey", size = 2) +
+  annotate("text", label = "Republicans, Primary Party of Opposition", x = 90, y = 0.25, 
+           color = "black", angle = 0, fontface="bold", size = 3.5) +
+  annotate("text", label = "Democrats, Primary Party of Opposition", x = 90, y = -0.15, 
+           color = "black", angle = 0, fontface="bold", size = 3.5)
+```
+
+How did such a transformation occur? How is it possible that a stalwart tradition of rightwing noninterventionism vanished from American politics? Not only did it disappear, but the right transformed into the republic’s biggest supporters of interventionism. Before exploring some possibilities, we should recap ideological landscape on the eve of the Old Isolationist’s collapse. A covered earlier, the first 15 years of the Cold War saw a Republican Party divided over the proposed course of the struggle. The right wing of the party was especially recalcitrant. Of the 536 Republican Senators and Representatives who served during this period, 144 tallied an opposition score over 50% (27% of the GOP). Of those 87 were on the party’s right. Over 70% of the Republican right significantly opposed the Cold War status quo or held on to their conceptions of an earlier America. They were joined by a small cadre of centrists and two, holdouts on the left, vestiges of an earlier progressive, anti-imperialist era of Republican politics, Merlin Hull (WI-9) and Usher Burdick (ND-At Large). 
+
+<h2> Regionalism </h2>
+
+The Old Isolationists hailed largely from the Midwest. While a few notable individuals represented regions elsewhere in the union, the bulk arose out of a regionalist political tradition centered in the Dakotas, Nebraska, Kansas, Iowa, Illinois, Missouri, Minnesota, Wisconsin, Indiana, and Ohio. Of the 236 Midwest Republicans during this period, 106, nearly half recorded and opposition percentage above 50%. Nearly three-quarters (72%) of the Old Isolationists represented individuals from the Midwest. Midwestern Republicanism was not of course entirely isolationist. Within middle America laid a stark urban-rural divide. Large city centers were almost always represented by an interventionist Republican or a Democrat. Even during the 81st Congress, the crescendo of Midwestern isolationism during the war, the largest urban centers represented by the Old Isolationists were Kansas City, Wichita, and Peoria. In addition to the Midwest’s urban centers, Republican interventionists largely represented states and districts within the country’s northeastern tier. Between 1945 to 1960, 44% came from New England, Pennsylvania, New Jersey, and New York. The divide between the “Old Isolationist” and interventionists mirrored that of the intraparty fight between the GOP’s largely conservative Midwest and mostly liberal/moderate north.
+
+<aside>
+<b> Regionalism of Republican Noninterventionism, <br> Members per Region, 1945-1960: </b> </b>
+<table style="width:100%">
+  <tr>
+    <th>Region</th>
+    <th>No. of Politicians</th> 
+  </tr>
+  <tr>
+    <td>1. Midwest</td>
+    <td>106</td>
+  </tr>
+  <tr>
+    <td>2. Rockies</td>
+    <td>12</td>
+  </tr>
+  <tr>
+    <td>3. North</td>
+    <td>12</td>
+  </tr>
+    <tr>
+    <td>4. South</td>
+    <td>7</td>
+  <tr>
+    <td>5. Southwest</td>
+    <td>5</td>
+  <tr>
+    <td>6. West</td>
+    <td>4</td>
+  </tr>
+</table>
+</aside>
+
+The Democratic Party was overwhelmingly interventionist during the early Cold War. Of the 709 Senators and Representatives who served during this period, only 46, a minuscule 6% recorded an opposition score above 50%. Democratic noninterventionists, mostly fiscal and social conservatives also had their own regional redoubt. These politicians resided predominately in the Democratic Party’s “Solid South.” These Democrats, like their Republican colleagues were mostly were from rural consistencies. If we take the 81st Congress as an example, the only urban centers represented by noninterventionist Democrats were Fresno, California, and Tallahassee, Florida.
+
+
+```{r, layout="l-page", echo= FALSE}
+
+total_iso<- key_votes %>%  
+  filter(congress > 78) %>% 
+  filter(congress < 87) %>% 
+  filter(wing != "UNK") %>% 
+  filter(cast_code == "iso") %>% 
+  group_by(icpsr, chamber, party_code) %>% 
+  summarize(iso_num = n()) %>% 
+  select(icpsr, iso_num, chamber, party_code)
+
+total_vote<- key_votes %>% 
+  filter(congress > 78) %>% 
+  filter(congress < 87) %>% 
+  filter(wing != "UNK") %>% 
+  filter(cast_code != "nv") %>% 
+  group_by(icpsr, chamber, party_code) %>% 
+  summarize(total_vote = n()) %>% 
+  left_join(total_iso, by =c("icpsr", "chamber", "party_code")) %>% 
+  drop_na(party_code)
+
+total_vote[is.na(total_vote)] <- "0"
+
+total_vote$total_vote <- as.numeric(as.character(total_vote$total_vote))
+total_vote$iso_num <- as.numeric(as.character(total_vote$iso_num))
+
+leaderboard_1<- Hall_all_members %>%
+  filter(wing != "UNK") %>% 
+  filter(congress > 78) %>% 
+  filter(congress < 87) %>%
+  filter(chamber != "President") %>% 
+  distinct(icpsr, bioname, chamber, party_code, wing, state_abbrev) %>% 
+  left_join(total_vote, by = c("icpsr", "chamber", "party_code")) %>% 
+  mutate(oppo_per = iso_num / total_vote) %>% 
+  arrange(desc(oppo_per)) %>% 
+  drop_na(oppo_per)
+
+pal<- c("#8e44ad", "#239b56", "#f39c12")
+
+leaderboard_1 %>%
+  left_join(regions, by = "state_abbrev") %>% 
+  filter(party_code != "Independent") %>% 
+  ggplot(aes(x= oppo_per, fill = region)) + geom_histogram(bins = 40) + facet_grid(wing~party_code) +
+  labs(title = "Voting Patterns of U.S. Congress on Cold War Policy",
+       subtitle = "79th to 86th Congresses, by Party, Wing, and Region",
+       fill = "Region",
+       x = "Opposition Percentage 1945 - 1960",
+       y = "Number of Members") +
+  scale_x_continuous(labels = c("0%", "25%", "50%", "75%", "100%"))+
+  scale_y_continuous(breaks = c(1, 10, 20, 30, 40, 50, 60, 70, 80, 90),
+                     labels = c("1", "10", "20", "30", "40", "50", "60", "70", "80", "90")) +
+  theme_bw(base_size = 8) +
+  geom_vline(xintercept = 0.5, linetype="dashed", color = "grey", size = 1) +
+  theme(legend.position="bottom", legend.box = "horizontal",
+        legend.title = element_text(size=8, color = "Black", face="bold")) +
+  guides(fill = guide_legend(nrow = 1),(override.aes = list(size=5)))
+
+
+```
+
+
+
+```{r, layout="l-page", echo= FALSE}
+
+include_graphics("C:/Users/bpbuc/Documents/Brandan's Stuff/_PhD Stuff/Dissertation Research/new_digital_project/map/81_congress.jpg")
+
+```
+
+<h2> Trends within the Republican Party </h2>
+
+The transformation of the Republican right was significant and prolong. While all three wings jettisoned early their opposition to large defense budgets and a peacetime draft, the right maintained a consistent and significant opposition to foreign aid spending and a turbulent relationship with diplomatic policy more generally. 
+
+```{r, layout="l-page"}
+
+pal<- c("#33a532", "#cf142b", "#f7b500")
+
+label<- c(econ = "Foreign Aid", gov = "Diplomatic Policy", mil = "Military Policy and Appropriations", treaty = "Treaties")
+
+vote_total<- key_votes %>% 
+  filter(wing != "UNK") %>% 
+  filter(party_code == "Republican") %>% 
+  group_by(congress, type_1, wing) %>% 
+  summarize(vote_total = n())
+
+key_votes %>%
+  filter(wing != "UNK") %>% 
+  filter(party_code == "Republican") %>% 
+  group_by(cast_code, congress, type_1, wing) %>% 
+  summarize(no = n()) %>% 
+  left_join(vote_total, by = c("congress", "type_1", "wing")) %>% 
+  mutate(cong_per = no / vote_total) %>% 
+  ggplot(aes(x= congress, y= cong_per, color = cast_code)) + 
+  geom_point(size= 1.35) + geom_line(size= 0.75) +      
+  facet_grid(wing~type_1, labeller=labeller(type_1 = label)) +
+    labs(title = "Voting Patterns of U.S. Congress on Cold War Policy",
+       subtitle = "Republican Party, by Wing and Type, 79th to 101st Congresses",
+       color = "Cohort",
+       x = "Congress",
+       y = "Average Percentage Per Congress") +
+  theme_bw(base_size = 8) +
+  scale_color_manual(values = pal,
+                     labels = c("Support", "Opposition", "Noncommitted")) +
+  theme(legend.position="bottom", legend.box = "horizontal",
+        legend.title = element_text(size=8, color = "Black", face="bold")) +
+  guides(color = guide_legend(override.aes = list(size=1))) +
+  scale_y_continuous(breaks=c(0, .3, .6, 0.9),
+                      labels=c("0%","30%", "60%","90%")) +
+  scale_x_continuous(breaks = c(80, 85, 90, 95, 100),
+                     labels = c("80th", "85th", "90th", "95th", "100th"))
+
+```
+
+Rightwing resistance to defense spending and appropriations would be the first to fall. Only 19 rightwing Republicans, 14 Representatives and five Senators tallied a military opposition percentage above 50% during the Cold War. Their departure would constitute the first culling of the Old Isolationist herd. 14 would not make it out of the 81st Congress (1949-1951). Three of the remaining four lingered on until departing public service by the 84th Congress. 
+
+One of the final holdouts from the early Cold War period, Howard Buffett (NE-2) maintained a vocal opposition to the draft upon leaving office. In 1962 Buffett wrote an op-ed in the libertarian leaning <i> New Individualist Review </i> entitled “An Opportunity for the Republican Party” in which he called conscription an “Old World evil” and compared to slavery. He urged the GOP to lead an effort to abolish draft, as the party of Lincoln had ended chattel slavery. Buffett would not live to see the end of conscription; he died on 30 April 1964 at the age of 60. So total was their evolution into militarism that it was not until Rep. Ron Paul (TX-22) entered office during the 94th Congress (1975-1977) did the right have an office holder who displayed a consistent opposition to the excesses of the military-industrial-complex. Rep. Paul would be the <i> only </i> such political figure for the remainder of the Cold War and for the rest of the 20th Century.
+
+
+```{r}
+mil_leaderboard<-read.csv("C:/Users/bpbuc/Documents/Brandan's Stuff/_PhD Stuff/Dissertation Research/new_digital_project/clean_data/mil_leaderboard.csv")
+
+mil<- mil_leaderboard %>%
+  filter(wing == "Right") %>% 
+  filter(party_code == "Republican") %>% 
+  filter(oppo_per > .50) %>% 
+  select(bioname, oppo_per, state_abbrev, first_cong, last_cong) %>% 
+  arrange(last_cong)
+
+paged_table(mil)
+
+```
+
+
+The Republican right’s stance on diplomatic policy would remain fraught throughout the early Cold War. It would not be until the 95th Congress (1977-1979) that support would consistently outpace opposition. In the preceding congress the stance of right was highly contextual, often related to the nature of the legislation. Throughout the early Cold War, the right made futile attempts to curb executive power, and made attempts to thwart U.S. involvement in multilateral and supranational organizations. However, from the 95th Congress forward the right would come to largely embrace U.S. diplomatic policy while maintain a suspicious towards U.S. involvement in international organizations. 
+
+Despite these compromised, the Republican right would maintain a dogged opposition to foreign aid throughout the early Cold War. As detailed in my 811 paper the roots of this dissent were many. However, that opposition declined significantly in the 90th Congress (1967-1969). The distance between opposition and support would remain close for the entire 1970s. Support would finally outpace opposition during the 97th Congress (1981-1983), the first congress to serve with the Reagan administration. For the remainder of the Cold War the right would be fully enmeshed within the U.S. governments suite of foreign policy initiatives.  
+  
+
+
+<h2> The Big Flip </h2>
+
+It would be tempting to ascribe these changes to good-ole-fashioned partisanship. Perhaps the American right jettisoned its noninterventionist tendencies because of the Reagan revolution. Did the Gipper manage to rouse right into accepting the full suite of Cold War policy? A closer look at the decline of the Old Isolationists as related to presidential administrations belies that hypothesis. The right’s opposition fell during Republican administrations as well as during Democratic ones. In fact, the rightwing resistance to the foreign policy status quo increased during the Eisenhower presidency. The GOP’s rightwing in the House and the Senate increased their opposition during Ike’s tenure as president, only to resume their slide into interventionism. Both the rightwing of the Senate and House would dip below a median 50% opposition rate during the JFK administration. Both would be overtaken by the left wing of the party during the Nixon and Carter administrations, respectfully.
+
+```{r, layout="l-page"}
+
+pal<- c("#8e44ad", "#239b56", "#f39c12")
+
+total_iso<- key_votes %>% 
+  filter(wing != "UNK") %>% 
+  filter(congress > 78) %>% 
+  filter(party_code != "Independent") %>% 
+  filter(cast_code == "iso") %>% 
+  group_by(congress, wing, chamber, party_code) %>% 
+  summarize(iso_num = n()) %>% 
+  select(congress,wing, iso_num, chamber, party_code)
+
+key_votes %>% 
+  filter(wing != "UNK") %>% 
+  filter(congress > 78) %>% 
+  filter(party_code != "Independent") %>% 
+  filter(cast_code != "nv") %>% 
+  group_by(congress, chamber, party_code, wing) %>% 
+  summarize(total_vote = n()) %>% 
+  left_join(total_iso, by = c ("congress", "chamber", "wing", "party_code")) %>% 
+  mutate(oppo_per = iso_num / total_vote) %>% 
+  ggplot(aes(x= congress, y= oppo_per, color = wing)) + 
+  geom_point(size= 1.5) + geom_smooth(size = .5,alpha = 0.5) +
+  facet_grid(chamber~party_code) +
+  scale_color_manual(values = pal,
+                     labels = c("Center", "Left", "Right")) +
+  labs(title = "Congressional Opposition on Cold War Policy",
+       subtitle = "By Wing and Party, 79th to 101st Congresses",
+       color = "Wing",
+       x = "Congress",
+       y = "Median Opposition Percentage Per Wing") +
+  theme_bw(base_size = 8) +
+  theme(legend.position="bottom", legend.box = "horizontal",
+        legend.title = element_text(size=8, color = "Black", face="bold")) +
+  guides(color = guide_legend(override.aes = list(size=1))) +
+  scale_y_continuous(breaks=c(0, .25, .5, .75),
+                     labels=c("0%", "25%", "50%", "75%")) +
+  scale_x_continuous(breaks = c(80, 85, 90, 95, 100),
+                     labels = c("80th", "85th", "90th", "95th", "100th")) +
+  annotate("rect", xmin = 97, xmax = 101, ymin = .0, ymax = .8,
+           alpha = .1, fill = "red") +
+  annotate("text", label = "Reagan/Bush", x = 99, y = .85, 
+           color = "black", angle = 0, fontface="bold", size = 1.5) +
+  annotate("rect", xmin = 95, xmax = 97, ymin = .0, ymax = .8,
+           alpha = .1, fill = "blue") +
+  annotate("text", label = "Carter", x = 96, y = .85, 
+           color = "black", angle = 0, fontface="bold", size = 1.5) +
+  annotate("rect", xmin = 91, xmax = 95, ymin = .0, ymax = .8,
+           alpha = .1, fill = "red") +
+  annotate("text", label = "Nixon/Ford", x = 93, y = .85, 
+           color = "black", angle = 0, fontface="bold", size = 1.5) +
+  annotate("rect", xmin = 87, xmax = 91, ymin = .0, ymax = .8,
+           alpha = .1, fill = "blue") +
+  annotate("text", label = "JFK/LBJ", x = 89, y = .85, 
+           color = "black", angle = 0, fontface="bold", size = 1.5) +
+  annotate("rect", xmin = 83, xmax = 87, ymin = .0, ymax = .8,
+           alpha = .1, fill = "red") +
+  annotate("text", label = "Eisenhower", x = 85, y = .85, 
+           color = "black", angle = 0,fontface="bold", size = 1.5) +
+  annotate("rect", xmin = 79, xmax = 83, ymin = .0, ymax = .8,
+           alpha = .1, fill = "blue") +
+  annotate("text", label = "Truman", x = 81, y = .85, 
+           color = "black", angle = 0, fontface="bold", size = 1.5) +
+  geom_hline(yintercept = 0.5, linetype="dashed", color = "grey", size = 1)
+
+
+
+```
+
+<h2> A Generational Divide? </h2>
+
+Could this transformation simply be the result of a generational divide? A cursory look at the data would suggest so. Arranging members according to the year of their birth v. their career opposition percentage suggests strong causational link for rightwing politicians between the year of their birth and their Cold War voting record on foreign policy. Three dates make this relationship intriguing, 1880, 1900 and 1927.
+
+If they were born on 1880 or earlier, they would have been old enough to have fought in the Spanish-American War and participated the subsequent American occupation of the Philippines. Their foreign policy worldview would have likely been informed by intense debate about formal American empire in Southeast Asia and an increased hegemony in the Western Hemisphere. The Old Isolationists had their antecedents to these events and several rightwing anti-imperialists named the Spanish-American War as the genesis of their noninterventionism. Many rightwing noninterventionists, particularly of the nationalist stripe cite the U.S. occupation of the Philippines as a moment where the American (small r) republican experiment went astray. If we use the 50% threshold for an individual’s career opposition percentage than 12 meet the definition for Cold War noninterventionism, five for interventionism. 
+ 
+
+<aside>
+<b> Generational Divide on the Republican Right, <br> Members with Opposition Scores over 50%,</br> By Generation</b>
+<table style="width:100%">
+  <tr>
+    <th>Born</th>
+    <th>No. Over 50%</th> 
+    <th>No. Under 50%</th>
+  </tr>
+  <tr>
+    <td>Before 1880</td>
+    <td>12</td>
+    <td>5</td>
+  </tr>
+  <tr>
+    <td>Before 1900</td>
+    <td>66</td>
+    <td>25</td>
+  </tr>
+  <tr>
+    <td>Before 1927</td>
+    <td>101</td>
+    <td>107</td>
+  </tr>
+    <tr>
+    <td>After 1927</td>
+    <td>4</td>
+    <td>103</td>
+  </tr>
+</table>
+</aside>
+
+If they were born on or before 1900 then they would have been old enough to have fought in the Great War. Their foreign policy consciousness would have undoubtably been formed by this U.S. intervention into European affairs and the sacrifice of American blood and treasure pursuant thereto. Their perceptions would have also been formed by the intense debates which proceeded American entry into the war and the resistance the Wilsonian vision for an assertive America on the world’s stage. If we maintain our 50% threshold 66 members born before 1900 would go on to display noninterventionist tendencies during the Cold War.
+
+If they were born before 1927 then they would have been old enough to have fought in World War II. Their philosophy on U.S. involvement in world affairs would have been informed by another American intervention into Europe and another round of intense debate related thereto. However, in the years after this war, this intervention would be caveated with the moral clarity of a defeated fascism, the burdensome history of appeasement, and the ethical weight of the Holocaust. The noninterventionist right of this era was also largely informed by an intense distain for FDR, opposition to strong executive authority, the New Deal, and liberal politics more generally. Many blamed these forces for U.S. entry into the European war and, more boldly, for goading the Japanese into attacking Pearl Harbor. These noninterventionists and anti-New Dealers, collectively known as “the Old Right” would assail the nascent Cold War order as technocratic ploy to prop up a dying British Empire and/or to undermine the American republic. The Second World War would however weaken these old critiques. The voting records of our rightwing Republican members born on or before 1927 was virtually split down the middle: 101 v. 107.
+
+If they were born after 1927 then they would have grown up in an America wrought by the Allied victory in the “good war” and subsequent showdown with communism. If they were born significantly after this benchmark, they would have no living memory of an earlier America, one very much in doubt as to its role in the world. If they were a Republican, they would have been born into a party which had somewhat made its peace with the New Deal and the imperial presidency. If they were a conservative, then they would have likely consumed rightwing media which eschewed the “isolationism,” and weak central government of yesteryear. In the early 1950’s Republican interventionists seized the means of intellectual and cultural production within American conservatism. Outlets like <i> The National Review</i>, and the once noninterventionist <i> Human Events</i>, and <i> Chicago Tribune</i> all provided a full-throated defense of the Cold War. William F. Buckley summed up the New Right’s view of the state and its relationship to the Cold War we he declared “we have to accept Big Government for the duration — for neither an offensive nor a defensive war can be waged … except through the instrument of a totalitarian bureaucracy within our shores." In this new world, <i> only six </i> Republicans, four of them on the right, would meet our 50% threshold for noninterventionism. Of them, only Texas’ iconoclastic Ron Paul would politically survive into the post-Cold War era.
+
+
+```{r, layout="l-screen-inset shaded", fig.height= 6}
+shape<- c(1,16)
+
+pal<- c("#8e44ad", "#239b56", "#f39c12")
+
+p1<- leaderboard %>% 
+  distinct(born, oppo_per, wing, chamber, party_code, bioname, congress_num) %>% 
+  filter(party_code != "Independent") %>% 
+  ggplot(aes(x= born, y= oppo_per, color = wing, 
+             label =  bioname, size = congress_num)) +
+  scale_color_manual(values = pal,
+                     labels = c("Center", "Left", "Right")) +
+  geom_point(alpha = .7) + geom_smooth() + facet_wrap(~party_code) +
+  labs(title = "Generational Divide of Cold War Congressional Politicians, Party and Wing",
+       color = "Wing",
+       size = "",
+       x = "Born",
+       y = "Career Opposition Percentage") +
+  scale_y_continuous(breaks=c(0, .25, .50, .75, 1),                                                                                 labels=c("0%", "25%", "50%", "75%", "100%")) +
+  geom_hline(yintercept = 0.5, linetype="dashed", color = "grey", size = 1) +
+  geom_vline(xintercept = 1880, linetype="dashed", color = "grey", size = .75) +
+  geom_vline(xintercept = 1900, linetype="dashed", color = "grey", size = .75) +
+  geom_vline(xintercept = 1927, linetype="dashed", color = "grey", size = .75)
+
+ggplotly(p1)
+
+
+```
+
+However, examining the trajectories of centrists and leftwing politicians from both political parties undermines a direct causal link between birth year and attitudes on the Cold War. Centrists from both parties did not display such a relationship. While centrists in the GOP born before 1900 were well represented in the noninterventionist camp…they were greatly outnumbered by their interventionist peers. The voting trajectory of these Republicans would meander “up” slightly, away from hard interventionism but would settle well below our 50% threshold. Only three centrist Republicans held an opposition score over our threshold. This slight shift away from more strident interventionism can be attributed to the political center’s evolution on U.S. involvement in international and supranational organizations. The center of the GOP grew slightly more oppositional to American support for supranational organizations such as the United Nations, the International Monetary Fund and, the World Bank. However, their support for direct U.S. action would remain strong. Under the Reagan administration, the Republican party would amalgamate the leftwing, Progressive vison of an internationally assertive America…with a rightwing penchant for nationalism and unilateralism. 
+
+<aside>
+<b> <b>Republican Opposition to U.S. Support for International Organizations,<br> Average Opposition Percentage by Wing:</b></b>
+<table style="width:100%">
+  <tr>
+    <th>Wing</th>
+    <th>79th to 89th Congresses:</th> 
+    <th>90th to 101st Congresses:</th>
+  </tr>
+  <tr>
+    <td>Right</td>
+    <td>55%</td>
+    <td>60%</td>
+  </tr>
+  <tr>
+    <td>Left</td>
+    <td>19%</td>
+    <td>13%</td>
+  </tr>
+  <tr>
+    <td>Center</td>
+    <td>28%</td>
+    <td>45%</td>
+</table>
+</aside>
+
+The centrist faction from the Democratic party as well as the leftwing from both parties would display a pattern which was the opposite of that of the Republican right. With a few notable exceptions, the later these politicians were born, the stronger their opposition to the Cold War paradigm. This is not a new revelation. “The New Left” as they would become known, burst onto the political scene in large part as reaction to the excesses of the U.S. government’s prosecution of the Cold War. The horrors of the Vietnam War and U.S. support of rightwing authoritarian regimes animated their resistance the foreign policy status quo. The left’s evolution reached its crescendo during the Reagan administration. While the New Left’s intellectual trajectory undermines a direct causal relationship between generation and views on foreign policy it does provide a relief on the course of the right. The American right came to full embrace the post-war narrative, while the left came to question it. In doing, the polarities of support and resistance for America’s role in the world would flip.
+
+<h2> The Decline of the Old Right and the Southern Strategy </h2>
+
+There is a slightly less inelegant explanation for this shift, the Republican right during the second half of the Cold War was not the same political body as that of the first half of the Cold War. Two successive political trends made this possible. First was the contraction of the Old Right which occurred rapidly between 1945 and 1968, particularly in the United States Senate. As spelled out in my previously notebook and my 811 paper the Republican Party tacked to the center during the 1950s and 60s. Casualties of this political transformation were a number of the Old Isolationists who were either defeated in general elections or who saw the writing on the wall and retired from public service. This transformation was the starkest in the rightwing of the Republican Senate. These senators had displayed the most strident opposition to the Cold War paradigm between the 79th and 86th Congresses with an opposition score of 62%. By the Reagan Era, when the Cold War was in the meat of its second phase, the body was an ardent congressional supporter of U.S. foreign policy. During the 97th to the 101st Congresses the rightwing of the Republican Senate tallied an opposition score of 18% the lowest of any combination of party, wing, or chamber. The Eugene Siler case study from my 811 paper is an example of this political transformation. Siler, a right-winger (career opposition score: 63%) sought to win a Senatorial election of an open seat of the outgoing centrist Sen. Thurston Morton (15%) and lost in the primary to centrist Marlow Cook (32%).
+
+The second half of this transformation was largely the result of the Republican Party’s Southern Strategy. The strategy is understood by historians as being primarily motivated by the party’s desire to turn white anxieties centered social change and race relations into a voting bloc which would disrupt the Democratic Party’s Solid South. This transformation also appears who have aided the Republican Party’s ideological homogenization on the Cold War. The Democratic South, particularly its House representation displayed some of the lowest opposition percentages of the Cold War. With their incorporation into the Republican Party, it seems likely that these Southern Democrats took their hardline with them. From 1945 to 1960 the Southern Democrats scored an opposition percentage of 15%. The Republican Midwest, conversely, even when figuring pockets of urban interventionism, was the Cold War’s most noninterventionist. During that same period, they tallied a 47% opposition percentage. By the 89th Congress the ideological center of gravity for the Republican right in both the House and the Senate shifted from the Midwest to the South. Midwestern representation were further diluted with members from the Southwest, a region of the country firmly integrated into America’s Cold War based economy. 
+
+
+
+```{r, layout="l-page"}
+
+rgop_total<- Hall_all_members %>% 
+  filter(wing == "Right") %>% 
+  filter(wing != "UNK") %>% 
+  filter(congress > 78) %>% 
+  filter(congress < 102) %>% 
+  group_by(congress, chamber, wing) %>% 
+  summarize(total_number = n())
+
+Hall_all_members %>% 
+  filter(wing == "Right") %>% 
+  filter(wing != "UNK") %>% 
+  filter(congress > 78) %>% 
+  filter(congress < 102) %>% 
+  left_join(regions, by = "state_abbrev") %>% 
+  filter(region != "NA") %>% 
+  filter(party_code == "Republican") %>% 
+  group_by(region, congress, chamber, wing) %>% 
+  summarize(number = n()) %>% 
+  left_join(rgop_total, by = c("congress", "chamber", "wing")) %>% 
+  mutate(percent = number / total_number) %>% 
+  ggplot(aes(x= congress, y= percent, color = region, label = number)) + 
+  geom_point(size= 1.5) + geom_line(size= .75) + facet_grid(~chamber) +
+  scale_y_continuous(breaks=c(0, 0.1, .2, .3, .4, .5),
+                     labels=c("0%", "10%", "20%", "30%", "40%", "50%")) +
+  scale_x_continuous(breaks = c(80, 85, 90, 95, 100),
+                     labels = c("80th", "85th", "90th", "95th", "100th")) +
+  labs(title = "Ideological Composition within the Rightwing of the Republican Party",
+       subtitle = "79th to 101st Congresses, by Wing and Region",
+       color = "Region",
+       x = "Congress",
+       y = "Percentage Per Region, Per Congress") +
+  theme_bw(base_size = 8) +
+  theme(legend.position="bottom", legend.box = "horizontal",
+        legend.title = element_text(size=8, color = "Black", face="bold")) +
+  guides(color = guide_legend(override.aes = list(size=3))) +
+  guides(color = guide_legend(nrow = 1),(override.aes = list(size=5)))
+
+
+```
+
+<h2> Generational & Regional Turnover </h2>
+
+If we looked at these two phenomena together, the decline of the Old Right, coupled with impact of the Southern Strategy, their relationship becomes clear. If we use a 50% opposition score as a threshold, then nearly half (46%) of the rightwing Republicans who reached that bar began their careers before the Cold War. Conversely, only 14 members who began their careers during the same period would go on to vote within the interventionist camp. These Old Isolationists were also overwhelmingly midwestern. 37 represented states or districts in middle America. Conversely, rightwing interventionists largely began their careers during the Cold War and were from other regions. Of the 198 rightwing Republicans who held career opposition scores below 50%, 184 (92%) would begin their careers during the struggle with communism. They would also be predominately, southern, with 67 members. The Midwest and Southwest would round out number two and three, with 39 and 30 respectfully. This turnover was especially stark within the Senate, as only one Midwestern Senator began their career after the 82nd Congress (1951-1953). All regions and both chambers would trend downward, the later the start of their career, the lower their opposition score…with the aforementioned Ron Paul being the solitary exception. While regional change cannot fully explain the Republican right’s transformation on foreign policy it looked a necessary component.
+
+```{r, layout="l-screen-inset shaded", fig.height= 6}
+
+p1<- leaderboard %>%
+  left_join(regions, by = "state_abbrev") %>% 
+  filter(wing == "Right") %>% 
+  filter(party_code == "Republican") %>% 
+  ggplot(aes(x= first_cong, y= oppo_per, color = region, label = bioname)) +
+  geom_point(size = 3, alpha = 0.85) + facet_wrap(~chamber) +
+  labs(title = "Career Beginnings of Right Wing Cold War Congressional Republicans",
+       subtitle = "First Congress Served, by Chamber, 1919 to 1991",
+       shape = "Chamber",
+       x = "First Congress Served",
+       y = "Career Opposition Percentage") +
+  theme_bw(base_size = 8) +
+  theme(legend.position="bottom", legend.box = "horizontal",
+        legend.title = element_text(size=8, color = "Black", face="bold")) +
+  guides(color = guide_legend(override.aes = list(size=5))) +
+  scale_y_continuous(breaks=c(0, .25, .50, .75, 1),
+                     labels=c("0%", "25%", "50%", "75%", "100%")) +
+  scale_x_continuous(breaks = c(60, 65, 70, 75, 80, 85, 90, 95, 100),
+                     labels = c("60th", "65th","70th", "75th","80th", "85th", "90th", "95th", "100th")) +
+  geom_hline(yintercept = 0.5, linetype="dashed", color = "grey", size = 1) +
+  geom_vline(xintercept = 79, linetype="dashed", color = "black", size = 1) +
+  annotate("text", label = "The Cold War Begins", 
+           x = 84, y = -0.03, color = "black", angle = 0, fontface="bold", size = 2) +
+  annotate("rect", xmin = 63, xmax = 66, ymin = .0, ymax = 1,
+           alpha = .1, fill = "blue") +
+  annotate("text", label = "Wilson", x = 64.5, y = 0.025, 
+           color = "black", angle = 0, size= 2, fontface="bold") +
+  annotate("rect", xmin = 66, xmax = 72, ymin = .0, ymax = 1,
+           alpha = .1, fill = "red") +
+  annotate("text", label = "Harding-Coolidge-Hoover", x = 69, y = 0.025, 
+           color = "black", angle = 0, size = 1.75, fontface="bold") +
+  annotate("rect", xmin = 72, xmax = 83, ymin = .0, ymax = 1,
+           alpha = .1, fill = "blue") +
+  annotate("text", label = "FDR-Truman", x = 77, y = 0.025, 
+           color = "black", angle = 0, size= 2, fontface="bold") +
+  annotate("rect", xmin = 83, xmax = 87, ymin = .0, ymax = 1,
+           alpha = .1, fill = "red") +
+  annotate("text", label = "Eisenhower", x = 85, y = 0.025, 
+           color = "black", angle = 0,fontface="bold", size = 2) +
+  annotate("rect", xmin = 97, xmax = 101, ymin = .0, ymax = 1,
+           alpha = .1, fill = "red") +
+  annotate("text", label = "Reagan/Bush", x = 99, y = 0.025, 
+           color = "black", angle = 0, fontface="bold", size = 2) +
+  annotate("rect", xmin = 95, xmax = 97, ymin = .0, ymax = 1,
+           alpha = .1, fill = "blue") +
+  annotate("text", label = "Carter", x = 96, y = 0.025, 
+           color = "black", angle = 0, fontface="bold", size = 2) +
+  annotate("rect", xmin = 91, xmax = 95, ymin = .0, ymax = 1,
+           alpha = .1, fill = "red") +
+  annotate("text", label = "Nixon/Ford", x = 93, y = 0.025, 
+           color = "black", angle = 0, fontface="bold", size = 2) +
+  annotate("rect", xmin = 87, xmax = 91, ymin = .0, ymax = 1,
+           alpha = .1, fill = "blue") +
+  annotate("text", label = "JFK/LBJ", x = 89, y = 0.025, 
+           color = "black", angle = 0, fontface="bold", size = 2)
+
+ggplotly(p1)
+
+```
+
+Similar trends can be observed by members’ career opposition scores against their final congress served. The more strident the opposition, the earlier their exit…again with Ron Paul being the solitary exception. The 81st Congress was especially brutal for the Old Isolationists, of any wing. 35 members from the previous congress did not return and the cohort only gained an additional six members, for a loss of 29. Such was the trend for the rest of the Cold War. Republican noninterventionist would only gain representation in two congress, the 82nd and the 87th. These fleeting victories aside, the body would hemorrhage members every two years. The 86th and 89th congress were also especially bad for Republican noninterventionists, as they lost 19 and 13 members, respectfully.  
+
+```{r, layout="l-screen-inset shaded", fig.height= 6}
+
+shape<- c(1,16)
+
+p1<- leaderboard %>%
+  left_join(regions, by = "state_abbrev") %>% 
+  filter(wing == "Right") %>% 
+  filter(party_code == "Republican") %>% 
+  ggplot(aes(x= last_cong, y= oppo_per, color = region, label = bioname)) +  
+  geom_point(size = 3, alpha = 0.85) + facet_wrap(~chamber) +
+  labs(title = "Career Longevity of Right Cold War Congressional Republicans",
+       subtitle = "Final Congress Served, by Chamber, 1945 to 2015",
+       shape = "Chamber",
+       x = "Final Congress Served",
+       y = "Career Opposition Percentage") +
+  theme_bw(base_size = 8) +
+  theme(legend.position="bottom", legend.box = "horizontal",
+        legend.title = element_text(size=8, color = "Black", face="bold")) +
+  guides(color = guide_legend(override.aes = list(size=5))) +
+  geom_vline(xintercept = 102, linetype="dashed", color = "black", size = 1) +
+  scale_x_continuous(breaks = c(80, 85, 90, 95, 100, 105, 110, 115),
+                     labels = c("80th", "85th", "90th", "95th", "100th", "105th", "110th", "115th")) +
+  scale_y_continuous(breaks=c(0, .25, .50, .75, 1),
+                     labels=c("0%", "25%", "50%", "75%", "100%")) +
+  geom_vline(xintercept = 102, linetype="dashed", color = "black", size = 1) +
+  annotate("text", label = "The Cold War Ends", 
+           x = 108.5, y = 0, color = "black", angle = 0, fontface="bold", size = 4)+
+  geom_hline(yintercept = 0.5, linetype="dashed", color = "grey", size = 1) +
+    annotate("rect", xmin = 101, xmax = 103, ymin = .0, ymax = 1,
+           alpha = .1, fill = "red") +
+  annotate("rect", xmin = 103, xmax = 106, ymin = .0, ymax = 1,
+           alpha = .1, fill = "blue") +
+  annotate("text", label = "Clinton", x = 104.5, y = -0.025, 
+           color = "black", angle = 0, fontface="bold", size = 1.75) +
+  annotate("rect", xmin = 106, xmax = 110, ymin = .0, ymax = 1,
+           alpha = .1, fill = "red") +
+  annotate("text", label = "GW Bush", x = 108, y = -0.025, 
+           color = "black", angle = 0, fontface="bold", size = 1.75) +
+  annotate("rect", xmin = 110, xmax = 114, ymin = .0, ymax = 1,
+           alpha = .1, fill = "blue") +
+  annotate("text", label = "Obama", x = 112, y = -0.025, 
+           color = "black", angle = 0, fontface="bold", size = 1.75) +
+  annotate("rect", xmin = 114, xmax = 116, ymin = .0, ymax = 1,
+           alpha = .1, fill = "red") +
+  annotate("text", label = "Trump", x = 115, y = -0.025, 
+           color = "black", angle = 0, fontface="bold", size = 1.75) +
+  annotate("rect", xmin = 79, xmax = 83, ymin = .0, ymax = 1,
+           alpha = .1, fill = "blue") +
+  annotate("text", label = "Truman", x = 81, y = -0.025, 
+           color = "black", angle = 0, size= 2, fontface="bold") +
+  annotate("rect", xmin = 83, xmax = 87, ymin = .0, ymax = 1,
+           alpha = .1, fill = "red") +
+  annotate("text", label = "Eisenhower", x = 85, y = -0.025, 
+           color = "black", angle = 0,fontface="bold", size = 2) +
+  annotate("rect", xmin = 97, xmax = 101, ymin = .0, ymax = 1,
+           alpha = .1, fill = "red") +
+  annotate("text", label = "Reagan/Bush", x = 100, y = -0.025, 
+           color = "black", angle = 0, fontface="bold", size = 2) +
+  annotate("rect", xmin = 95, xmax = 97, ymin = .0, ymax = 1,
+           alpha = .1, fill = "blue") +
+  annotate("text", label = "Carter", x = 96, y = -0.025, 
+           color = "black", angle = 0, fontface="bold", size = 2) +
+  annotate("rect", xmin = 91, xmax = 95, ymin = .0, ymax = 1,
+           alpha = .1, fill = "red") +
+  annotate("text", label = "Nixon/Ford", x = 93, y = -0.025, 
+           color = "black", angle = 0, fontface="bold", size = 2) +
+  annotate("rect", xmin = 87, xmax = 91, ymin = .0, ymax = 1,
+           alpha = .1, fill = "blue") +
+  annotate("text", label = "JFK/LBJ", x = 89, y = -0.025, 
+           color = "black", angle = 0, fontface="bold", size = 2)
+
+ggplotly(p1)
+
+```
+
+```{r}
+
+departed<-leaderboard %>% 
+  left_join(regions, by = "state_abbrev") %>% 
+  distinct(bioname, chamber, region, oppo_per, party_code, wing, first_cong, last_cong) %>% 
+  filter(party_code == "Republican") %>% 
+  filter(oppo_per > .50) %>% 
+  group_by(last_cong) %>% 
+  summarize(number_left = n()) %>% 
+  mutate(congress = last_cong + 1) %>% 
+  select(congress, number_left)
+
+entered<-leaderboard %>% 
+  filter(first_cong > 79) %>%
+  left_join(regions, by = "state_abbrev") %>% 
+  distinct(bioname, chamber, region, oppo_per, party_code, wing, first_cong, last_cong) %>% 
+  filter(party_code == "Republican") %>% 
+  filter(oppo_per > .50) %>% 
+  group_by(first_cong) %>% 
+  summarize(number_entered = n())
+
+names(entered)[1]<-"congress"
+
+turnover<- departed %>% 
+  left_join(entered, by = "congress") 
+
+turnover[is.na(turnover)] <- 0
+
+turnover_1<- turnover %>% 
+  mutate(difference = number_entered - number_left)
+
+paged_table(turnover_1)
+    
+```
+
+Most of this trend can be attributed to turnover between Congresses, not individual members “flipping” from noninterventionists to interventionists. Noninterventionism was largely the victims of attrition. In the 99th congress, the nadir of the Republican party’s opposition to the Cold War, of 236 GOP representatives and senators, only 19 (8%) were former noninterventionists and only three had served since the Eisenhower administration. There are however some well known names in this list, many of whom are prominent senators. Some of those names include, Bob Dole (KS), former Democrat Strom Thurmond (SC), and Barry Goldwater (AZ). If we broaden our timeframe slightly to those who bridged the transformation of the GOP from the Old Right into the New Right (from the 83th to the 90th Congress), then 28 Senators or Representatives softened on their opposition to the Cold War. These individuals represent a minuscule 2.6% of the 1,057 Republican House and Senate members who served during the Cold War. The data suggests that, for the most part, individuals who came into congress as a noninterventionist left as a noninterventionist. 
+
+```{r, layout="l-page", fig.height= 6}
+
+flipped<- read.csv("C:/Users/bpbuc/Documents/Brandan's Stuff/_PhD Stuff/Dissertation Research/new_digital_project/clean_data/flipped.csv") 
+ 
+ total_iso<- key_votes %>% 
+   filter(cast_code == "iso") %>% 
+   group_by(icpsr, congress) %>% 
+   summarize(total_iso = n())
+ 
+ total_vote<- key_votes %>% 
+   filter(cast_code != "nv") %>% 
+   group_by(icpsr, congress) %>% 
+   summarize(total_vote = n()) 
+ 
+ 
+ p1<-Hall_all_members %>% 
+   left_join(flipped, by = "icpsr") %>% 
+   filter(flipped == "y") %>% 
+   left_join(total_iso, by = c("icpsr", "congress")) %>% 
+   left_join(total_vote, by = c("icpsr", "congress")) %>% 
+   drop_na(total_iso) %>% 
+   mutate(iso_per = total_iso / total_vote) %>% 
+   ggplot(aes(x= congress, y= iso_per, color = bioname, label = wing)) + geom_point() + geom_line() +
+   labs(title = "Republicans who Flipped on Cold War Policy",
+        color = "Name",
+        x = "Congress",
+        y = "Opposition Percentage per Person, per Congress") +
+   scale_y_continuous(breaks=c(0, .25, .50, .75, 1),
+                      labels=c("0%", "25%", "50%", "75%", "100%")) +
+   scale_x_continuous(breaks = c(80, 85, 90, 95, 100),
+                      labels = c("80th", "85th", "90th", "95th", "100th")) +
+   annotate("text", label = "Reagan Era", x = 99.5, y = 0, 
+            color = "black", angle = 0, fontface="bold", size = 5) +
+   geom_hline(yintercept = 0.5, linetype="dashed", color = "grey", size = 1) +
+   annotate("pointrange", x = 97, y = 0, ymin = 0, ymax = .85,
+            color = "black", size = 1)
+ 
+ ggplotly(p1)
+
+```
+
+<h2> The New Landscape </h2>
+
+The Reagan and G.H.W. Bush administrations would resemble the geographic and ideological landscapes commonly recognized by scholars and educated laypersons. From 1981 until the end of the Cold War, only two Republicans would tally an opposition score over 50%, Senator Mark Hatfield (OR), and Rep. Ron Paul (TX-22). Paul would (arguably) be the only rightwing noninterventionist to serve in federal elected office for the remainder of the 20th century. The rest of the party would fall well below the 50% threshold. The Democrats would however be in the middle of their own blush with opposition…except for their rightwing.
+
+```{r, layout="l-page", echo= FALSE}
+
+total_iso<- key_votes %>%  
+  filter(congress > 96) %>%
+  filter(congress < 102) %>% 
+  filter(wing != "UNK") %>% 
+  filter(cast_code == "iso") %>% 
+  group_by(icpsr, chamber, party_code) %>% 
+  summarize(iso_num = n()) %>% 
+  select(icpsr, iso_num, chamber, party_code)
+
+total_vote<- key_votes %>% 
+  filter(congress > 96) %>%
+  filter(congress < 102) %>% 
+  filter(wing != "UNK") %>% 
+  filter(cast_code != "nv") %>% 
+  group_by(icpsr, chamber, party_code) %>% 
+  summarize(total_vote = n()) %>% 
+  left_join(total_iso, by =c("icpsr", "chamber", "party_code")) %>% 
+  drop_na(party_code)
+
+total_vote[is.na(total_vote)] <- "0"
+
+total_vote$total_vote <- as.numeric(as.character(total_vote$total_vote))
+total_vote$iso_num <- as.numeric(as.character(total_vote$iso_num))
+
+leaderboard_1<- Hall_all_members %>%
+  filter(wing != "UNK") %>% 
+  filter(congress > 96) %>%
+  filter(congress < 102) %>% 
+  filter(chamber != "President") %>% 
+  distinct(icpsr, bioname, chamber, party_code, wing, state_abbrev) %>% 
+  left_join(total_vote, by = c("icpsr", "chamber", "party_code")) %>% 
+  mutate(oppo_per = iso_num / total_vote) %>% 
+  arrange(desc(oppo_per)) %>% 
+  drop_na(oppo_per) %>% 
+  left_join(regions, by = "state_abbrev")
+
+
+pal<- c("#8e44ad", "#239b56", "#f39c12")
+
+leaderboard_1 %>% 
+  filter(party_code != "Independent") %>% 
+  ggplot(aes(x= oppo_per, fill = region)) + geom_histogram(bins = 40) + facet_grid(wing~party_code) +
+  labs(title = "Voting Patterns of U.S. Congress on Cold War Policy",
+       subtitle = "97th to 101st Congresses, by Party, wing, and Region",
+       fill = "Region",
+       x = "Opposition Percentage, 1981 - 1990",
+       y = "Number of Members") +
+  scale_x_continuous(limits = c(0,1),
+                     labels = c("0%", "25%", "50%", "75%", "100%"))+
+    scale_y_continuous(breaks = c(1, 10, 20, 30, 40, 50, 60, 70, 80, 90),
+                     labels = c("1", "10", "20", "30", "40", "50", "60", "70", "80", "90")) +
+  theme_bw(base_size = 8) +
+  theme(legend.position="bottom", legend.box = "horizontal",
+        legend.title = element_text(size=8, color = "Black", face="bold")) +
+  guides(fill = guide_legend(nrow = 1),(override.aes = list(size=5))) +
+  geom_vline(xintercept = 0.5, linetype="dashed", color = "grey", size = 1)
+
+
+```
+
+The ideological and geographic centers of opposition to the Cold War would virtually flip on their head between the start of the Cold War and its final chapter. Where opposition was once largely Republican, conservative, midwestern, and rural…it was by the Reagan Era almost entirely Democratic, liberal, coastal, and urban. Interestingly several regions within the Midwest, which had been represented by Old Isolationists were by the Reagan Era represented by Democrats who pushed back on the Cold War consensus. These few districts aside, the ideological and physical landscapes were a near reverse image.
+
+```{r, layout="l-page", echo= FALSE}
+
+include_graphics("C:/Users/bpbuc/Documents/Brandan's Stuff/_PhD Stuff/Dissertation Research/new_digital_project/map/99_congress.jpg")
+
+```
+
+<h2> Conclusion & Next Steps </h2>
+
+By the end of the Cold War the Republican party had effectively homogenized its foreign policy thinking. After decades of picking away at its Old Right faction, the GOP had become universally interventionist advocate of American hegemony. On the eve of the Cold War’s end, the Republican adopted the core predilections of both the left and the right. The party may have jettisoned the Old Right, but the post-Reagan iteration of the GOP kept their emphasis on unilateralism, sovereignty, and nationalism. These elements were fused with the center-left, Wilsonian vison of an activist American role in the wider world.
+
+In the coming weeks I would like to revisit the nature of members “flipping,” to establish and systematic means of identifying them. My current list was determined by manually going through the voting returns of several hundred individuals I deemed as possible defectors due to their borderline career opposition scores. 
+Additionally, I intend to gather further data on the career paths of the 164 Republicans who tallied opposition scores above 50%. I am particularly interested in when and how they ended their careers. How many of them retired, were primaried, died in office, etc? What patterns may emerge as to the means of their exit, their final congresses, and the intensity of their opposition. I have some data on a select cadre of Old Isolationists but none on bulk of these 164.  
+
+Lastly, I would like to track the trajectories of select group of Midwestern districts to see how their opposition independent of party, wing, or representative, waxed, waned, or stayed constant throughout the Cold War. 
+
+
+
